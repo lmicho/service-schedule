@@ -7,7 +7,14 @@ let logs: typeof import("./logs");
 let db: typeof import("./index").db;
 let schema: typeof import("./schema");
 
-const base = { performedAt: "2026-01-01", odometer: 0, cost: null, shop: null, notes: null };
+const base = {
+  performedAt: "2026-01-01",
+  odometer: 0,
+  cost: null,
+  scheduleItemId: null,
+  shop: null,
+  notes: null,
+};
 
 beforeAll(async () => {
   ({ db } = await import("./index"));

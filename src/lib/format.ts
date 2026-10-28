@@ -1,7 +1,39 @@
+import type { DueResult } from "./due";
+
 export function formatDistance(value: number, unit: string): string {
   return `${value.toLocaleString("fr-CA")} ${unit}`;
 }
 
 export function formatCurrency(value: number): string {
   return value.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
+}
+
+function remaining(value: number, unit: string): string {
+  return value < 0 ? `en retard de ${-value} ${unit}` : `dans ${value} ${unit}`;
+}
+
+/** Human-readable next-due lines, one per interval type the rule uses. */
+export function describeDue(due: DueResult, unit: string): string[] {
+  const lines: string[] = [];
+  if (due.nextDueOdometer !== null && due.remainingDistance !== null) {
+    const left = remaining(due.remainingDistance, unit).replace(/\d+/, (n) =>
+      Number(n).toLocaleString("fr-CA"),
+    );
+    lines.push(`à ${formatDistance(due.nextDueOdometer, unit)} (${left})`);
+  }
+  if (due.nextDueDate !== null && due.remainingDays !== null) {
+    lines.push(`le ${due.nextDueDate} (${remaining(due.remainingDays, "j")})`);
+  }
+  return lines;
+}
+
+/** "tous les 5 000 km · tous les 180 j" */
+export function describeInterval(
+  rule: { intervalDistance: number | null; intervalDays: number | null },
+  unit: string,
+): string {
+  const parts: string[] = [];
+  if (rule.intervalDistance) parts.push(`tous les ${formatDistance(rule.intervalDistance, unit)}`);
+  if (rule.intervalDays) parts.push(`tous les ${rule.intervalDays} j`);
+  return parts.join(" · ");
 }

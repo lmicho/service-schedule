@@ -18,6 +18,7 @@ describe("parseLogForm", () => {
         performedAt: "2026-03-01",
         odometer: 42000,
         cost: null,
+        scheduleItemId: null,
         shop: null,
         notes: null,
       },
@@ -28,6 +29,16 @@ describe("parseLogForm", () => {
     expect(parseLogForm(form({ ...valid, cost: "45,50" }))).toMatchObject({
       data: { cost: 45.5 },
     });
+  });
+
+  it("parses the linked rule id", () => {
+    expect(parseLogForm(form({ ...valid, scheduleItemId: "7" }))).toMatchObject({
+      data: { scheduleItemId: 7 },
+    });
+    expect(parseLogForm(form({ ...valid, scheduleItemId: "" }))).toMatchObject({
+      data: { scheduleItemId: null },
+    });
+    expect(parseLogForm(form({ ...valid, scheduleItemId: "abc" }))).toHaveProperty("state");
   });
 
   it("requires a title", () => {

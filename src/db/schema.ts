@@ -4,6 +4,8 @@ import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const VEHICLE_TYPES = ["car", "motorcycle", "other"] as const;
 export const ODOMETER_UNITS = ["km", "mi"] as const;
 
+export type VehicleType = (typeof VEHICLE_TYPES)[number];
+
 export const vehicles = sqliteTable("vehicles", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
@@ -28,6 +30,12 @@ export const scheduleItems = sqliteTable("schedule_items", {
   name: text("name").notNull(),
   intervalDistance: integer("interval_distance"),
   intervalDays: integer("interval_days"),
+  // Warn this long before the deadline; null = 10% of the interval.
+  warnDistance: integer("warn_distance"),
+  warnDays: integer("warn_days"),
+  // Where counting starts until a job is logged against the rule.
+  baselineOdometer: integer("baseline_odometer").notNull().default(0),
+  baselineDate: text("baseline_date"), // YYYY-MM-DD
   notes: text("notes"),
 });
 
