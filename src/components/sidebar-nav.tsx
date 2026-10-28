@@ -6,7 +6,7 @@ import { CarIcon, GridIcon } from "./icons";
 
 const items = [
   { href: "/", label: "Tableau de bord", icon: GridIcon, exact: true },
-  { href: "/vehicles", label: "Véhicules", icon: CarIcon, exact: false },
+  { href: "/vehicles", label: "Tous les véhicules", icon: CarIcon, exact: true },
 ];
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {

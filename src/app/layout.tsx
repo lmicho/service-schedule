@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Outfit } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { InlineScript } from "@/components/inline-script";
+import { VehicleNav } from "@/components/vehicle-nav";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -24,7 +26,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <InlineScript html={themeScript} />
       </head>
       <body className="h-full">
-        <AppShell>{children}</AppShell>
+        <AppShell
+          vehicleNav={
+            <Suspense fallback={null}>
+              <VehicleNav />
+            </Suspense>
+          }
+        >
+          {children}
+        </AppShell>
       </body>
     </html>
   );
