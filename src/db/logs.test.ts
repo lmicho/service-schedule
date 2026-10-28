@@ -1,0 +1,71 @@
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.stubEnv("DATABASE_PATH", ":memory:");
+
+const input = {
+  title: "Huile",
+  performedAt: "2026-03-01",
+  odometer: 10_000,
+  cost: null,
+  shop: null,
+  notes: null,
+};
+
+let mod: typeof import("./logs");
+let db: typeof import("./index").db;
+let schema: typeof import("./schema");
+
+beforeAll(async () => {
+  ({ db } = await import("./index"));
+  schema = await import("./schema");
+  const { migrate } = await import("drizzle-orm/better-sqlite3/migrator");
+  migrate(db, { migrationsFolder: "drizzle" });
+  mod = await import("./logs");
+});
+
+function addVehicle(odometer: number) {
+  return db
+    .insert(schema.vehicles)
+    .values({ name: "Test", type: "car", odometer })
+    .returning()
+    .get();
+}
+
+describe("insertLog", () => {
+  it("returns null for an unknown vehicle", () => {
+    expect(mod.insertLog(9999, input)).toBeNull();
+  });
+
+  it("raises the vehicle odometer when the log is higher", () => {
+    const v = addVehicle(5_000);
+    mod.insertLog(v.id, input);
+    const after = db
+      .select()
+      .from(schema.vehicles)
+      .all()
+      .find((x) => x.id === v.id);
+    expect(after?.odometer).toBe(10_000);
+  });
+
+  it("keeps the vehicle odometer when logging an older, lower reading", () => {
+    const v = addVehicle(50_000);
+    mod.insertLog(v.id, input);
+    const after = db
+      .select()
+      .from(schema.vehicles)
+      .all()
+      .find((x) => x.id === v.id);
+    expect(after?.odometer).toBe(50_000);
+  });
+});
+
+describe("listLogs", () => {
+  it("lists only that vehicle's logs, newest first", () => {
+    const a = addVehicle(0);
+    const b = addVehicle(0);
+    mod.insertLog(a.id, { ...input, title: "old", performedAt: "2025-01-01" });
+    mod.insertLog(a.id, { ...input, title: "new", performedAt: "2026-01-01" });
+    mod.insertLog(b.id, { ...input, title: "other" });
+    expect(mod.listLogs(a.id).map((l) => l.title)).toEqual(["new", "old"]);
+  });
+});
