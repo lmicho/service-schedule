@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
 import { getDashboardStats, listRecentLogs } from "@/db/stats";
-import { CarIcon, CashIcon, WrenchIcon } from "@/components/icons";
+import { CarIcon, CashIcon, ToolsIcon } from "@/components/icons";
 import { VehicleTable } from "@/components/vehicle-table";
 import { Card, MetricCard, PageTitle, linkMuted, td, th, tr, tableWrap } from "@/components/ui";
 import { formatCurrency, formatDistance } from "@/lib/format";
@@ -20,7 +20,7 @@ async function Dashboard() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
         <MetricCard icon={<CarIcon />} label="Véhicules" value={String(stats.vehicleCount)} />
         <MetricCard
-          icon={<WrenchIcon />}
+          icon={<ToolsIcon />}
           label="Travaux enregistrés"
           value={String(stats.logCount)}
         />

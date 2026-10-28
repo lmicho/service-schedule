@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
+import { InlineScript } from "@/components/inline-script";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -20,7 +21,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" className={`${outfit.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <InlineScript html={themeScript} />
       </head>
       <body className="h-full">
         <AppShell>{children}</AppShell>

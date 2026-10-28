@@ -35,10 +35,11 @@ export function CarIcon({ className = "size-6" }: IconProps) {
   );
 }
 
-export function WrenchIcon({ className = "size-6" }: IconProps) {
+export function ToolsIcon({ className = "size-6" }: IconProps) {
   return (
     <svg {...base} className={className}>
-      <path d="M14.7 6.3a4 4 0 005 5l-1.2-.4-6.9 6.9a2.1 2.1 0 01-3-3l6.9-6.9-.4-1.2a4 4 0 00-.4-.4z" />
+      <path d="M3 21h4L20 8a1.5 1.5 0 00-4-4L3 17v4" />
+      <path d="M14.5 5.5l4 4M12 8L7 3 3 7l5 5M7 8L5.5 9.5M16 12l5 5-4 4-5-5M16 17l-1.5 1.5" />
     </svg>
   );
 }
