@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:is(.dark *));
+
+/* Visual language borrowed from the TailAdmin dashboard template. */
+@theme {
+  --font-outfit: var(--font-outfit), sans-serif;
+
+  --text-title-lg: 20px;
+  --text-title-lg--line-height: 30px;
+  --text-title-sm: 18px;
+  --text-title-sm--line-height: 28px;
+
+  --color-brand-50: rgba(236, 243, 255, 1);
+  --color-brand-100: rgba(221, 233, 255, 1);
+  --color-brand-200: rgba(194, 214, 255, 1);
+  --color-brand-300: rgba(156, 185, 255, 1);
+  --color-brand-400: rgba(117, 146, 255, 1);
+  --color-brand-500: rgba(70, 95, 255, 1);
+  --color-brand-600: rgba(54, 65, 245, 1);
+  --color-brand-700: rgba(42, 49, 216, 1);
+  --color-brand-800: rgba(37, 45, 174, 1);
+  --color-brand-900: rgba(38, 46, 137, 1);
+  --color-brand-950: rgba(22, 25, 80, 1);
+
+  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  --shadow-theme-sm: 0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+
+  --z-index-99: 99;
+  --z-index-999: 999;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  body {
+    @apply bg-gray-50 font-outfit font-normal text-gray-800 dark:bg-gray-900 dark:text-white/90;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dark *,
+.dark ::after,
+.dark ::before {
+  border-color: var(--color-gray-800);
 }
