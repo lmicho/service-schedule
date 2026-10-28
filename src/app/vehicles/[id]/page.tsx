@@ -7,19 +7,9 @@ import { db } from "@/db";
 import { listLogs } from "@/db/logs";
 import { vehicles } from "@/db/schema";
 import { PlusIcon } from "@/components/icons";
-import {
-  Badge,
-  Card,
-  PageTitle,
-  buttonOutline,
-  buttonPrimary,
-  linkMuted,
-  tableWrap,
-  td,
-  th,
-  tr,
-} from "@/components/ui";
-import { formatCurrency, formatDistance } from "@/lib/format";
+import { LogsTable } from "@/components/logs-table";
+import { Badge, Card, PageTitle, buttonOutline, buttonPrimary, linkMuted } from "@/components/ui";
+import { formatDistance } from "@/lib/format";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 
 async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
@@ -76,47 +66,7 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
           </Link>
         }
       >
-        {logs.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">Aucun travail enregistré.</p>
-        ) : (
-          <div className={tableWrap}>
-            <table className="w-full min-w-140">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <th className={th}>Travail</th>
-                  <th className={th}>Date</th>
-                  <th className={`${th} text-end`}>Odomètre</th>
-                  <th className={`${th} text-end`}>Coût</th>
-                  <th className={th}>Garage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr key={log.id} className={tr}>
-                    <td className={td}>
-                      <div className="font-medium">{log.title}</div>
-                      {log.notes && (
-                        <div className="mt-0.5 whitespace-pre-line text-gray-500 dark:text-gray-400">
-                          {log.notes}
-                        </div>
-                      )}
-                    </td>
-                    <td className={`${td} whitespace-nowrap text-gray-500 dark:text-gray-400`}>
-                      {log.performedAt}
-                    </td>
-                    <td className={`${td} text-end whitespace-nowrap`}>
-                      {formatDistance(log.odometer, vehicle.odometerUnit)}
-                    </td>
-                    <td className={`${td} text-end whitespace-nowrap`}>
-                      {log.cost != null ? formatCurrency(log.cost) : "—"}
-                    </td>
-                    <td className={`${td} text-gray-500 dark:text-gray-400`}>{log.shop ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <LogsTable logs={logs} unit={vehicle.odometerUnit} />
       </Card>
     </>
   );

@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { Suspense, useState } from "react";
-import { CarIcon, CloseIcon, MenuIcon, PlusIcon } from "./icons";
+import { CarIcon, CloseIcon, MenuIcon } from "./icons";
 import { SidebarNav } from "./sidebar-nav";
 import { ThemeToggle } from "./theme-toggle";
-import { buttonPrimary } from "./ui";
 
 function Logo() {
   return (
@@ -20,7 +19,13 @@ function Logo() {
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  vehicleNav,
+  children,
+}: {
+  vehicleNav: React.ReactNode;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -45,6 +50,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Suspense fallback={null}>
             <SidebarNav onNavigate={() => setOpen(false)} />
           </Suspense>
+          {/* Server-rendered slot: close the mobile drawer when one of its links is clicked */}
+          <div
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest("a")) setOpen(false);
+            }}
+          >
+            {vehicleNav}
+          </div>
         </div>
       </aside>
 
@@ -65,10 +78,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Link href="/vehicles/new" className={`${buttonPrimary} h-11 py-0`}>
-              <PlusIcon />
-              <span className="hidden sm:inline">Ajouter un véhicule</span>
-            </Link>
           </div>
         </header>
 

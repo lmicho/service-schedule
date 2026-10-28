@@ -1,19 +1,27 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { db } from "@/db";
-import { vehicles } from "@/db/schema";
-import { getDashboardStats, listRecentLogs } from "@/db/stats";
-import { CarIcon, CashIcon, ToolsIcon } from "@/components/icons";
-import { VehicleTable } from "@/components/vehicle-table";
-import { Card, MetricCard, PageTitle, linkMuted, td, th, tr, tableWrap } from "@/components/ui";
+import { getDashboardStats, listVehiclesWithRecentLogs } from "@/db/stats";
+import { CarIcon, CashIcon, PlusIcon, ToolsIcon } from "@/components/icons";
+import { LogsTable } from "@/components/logs-table";
+import {
+  Badge,
+  Card,
+  MetricCard,
+  PageTitle,
+  buttonOutline,
+  buttonPrimary,
+  linkMuted,
+} from "@/components/ui";
 import { formatCurrency, formatDistance } from "@/lib/format";
+import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+
+const LOGS_PER_VEHICLE = 5;
 
 async function Dashboard() {
   await connection(); // sync SQLite driver: keep the queries out of prerendering
   const stats = getDashboardStats();
-  const all = db.select().from(vehicles).orderBy(vehicles.name).all();
-  const recent = listRecentLogs(5);
+  const entries = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
 
   return (
     <>
@@ -31,55 +39,41 @@ async function Dashboard() {
         />
       </div>
 
-      <Card
-        title="Mes véhicules"
-        action={
-          <Link href="/vehicles" className={linkMuted}>
-            Tout voir
+      {entries.length === 0 ? (
+        <Card>
+          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            Aucun véhicule pour l&apos;instant.
+          </p>
+          <Link href="/vehicles/new" className={buttonPrimary}>
+            <PlusIcon />
+            Ajouter un véhicule
           </Link>
-        }
-      >
-        <VehicleTable vehicles={all} />
-      </Card>
-
-      <Card title="Travaux récents">
-        {recent.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">Aucun travail enregistré.</p>
-        ) : (
-          <div className={tableWrap}>
-            <table className="w-full min-w-120">
-              <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <th className={th}>Travail</th>
-                  <th className={th}>Véhicule</th>
-                  <th className={th}>Date</th>
-                  <th className={`${th} text-end`}>Odomètre</th>
-                  <th className={`${th} text-end`}>Coût</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((log) => (
-                  <tr key={log.id} className={tr}>
-                    <td className={`${td} font-medium`}>{log.title}</td>
-                    <td className={td}>
-                      <Link href={`/vehicles/${log.vehicleId}`} className="hover:text-brand-500">
-                        {log.vehicleName}
-                      </Link>
-                    </td>
-                    <td className={`${td} text-gray-500 dark:text-gray-400`}>{log.performedAt}</td>
-                    <td className={`${td} text-end`}>
-                      {formatDistance(log.odometer, log.odometerUnit)}
-                    </td>
-                    <td className={`${td} text-end`}>
-                      {log.cost != null ? formatCurrency(log.cost) : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        entries.map(({ vehicle, logs, totalLogs }) => (
+          <Card
+            key={vehicle.id}
+            action={
+              <Link href={`/vehicles/${vehicle.id}/logs/new`} className={buttonOutline}>
+                <PlusIcon />
+                Logger un travail
+              </Link>
+            }
+            title={vehicle.name}
+          >
+            <div className="-mt-2 mb-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+              <Badge>{VEHICLE_TYPE_LABELS[vehicle.type]}</Badge>
+              {formatDistance(vehicle.odometer, vehicle.odometerUnit)}
+            </div>
+            <LogsTable logs={logs} unit={vehicle.odometerUnit} />
+            <div className="mt-4">
+              <Link href={`/vehicles/${vehicle.id}`} className={linkMuted}>
+                {totalLogs > logs.length ? `Voir tout (${totalLogs})` : "Voir la fiche"}
+              </Link>
+            </div>
+          </Card>
+        ))
+      )}
     </>
   );
 }

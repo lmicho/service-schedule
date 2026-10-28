@@ -21,7 +21,7 @@ export function VehicleTable({ vehicles }: { vehicles: Vehicle[] }) {
             <th className={th}>Véhicule</th>
             <th className={th}>Type</th>
             <th className={th}>Détails</th>
-            <th className={`${th} text-end`}>Odomètre</th>
+            <th className={th}>Odomètre</th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,7 @@ export function VehicleTable({ vehicles }: { vehicles: Vehicle[] }) {
               <td className={`${td} text-gray-500 dark:text-gray-400`}>
                 {[v.year, v.make, v.model].filter(Boolean).join(" ") || "—"}
               </td>
-              <td className={`${td} text-end`}>{formatDistance(v.odometer, v.odometerUnit)}</td>
+              <td className={td}>{formatDistance(v.odometer, v.odometerUnit)}</td>
             </tr>
           ))}
         </tbody>
