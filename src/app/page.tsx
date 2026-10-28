@@ -3,49 +3,94 @@ import { Suspense } from "react";
 import { connection } from "next/server";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
+import { getDashboardStats, listRecentLogs } from "@/db/stats";
+import { CarIcon, CashIcon, WrenchIcon } from "@/components/icons";
+import { VehicleTable } from "@/components/vehicle-table";
+import { Card, MetricCard, PageTitle, linkMuted, td, th, tr, tableWrap } from "@/components/ui";
+import { formatCurrency, formatDistance } from "@/lib/format";
 
-async function VehicleList() {
-  await connection(); // sync SQLite driver: keep the query out of prerendering
+async function Dashboard() {
+  await connection(); // sync SQLite driver: keep the queries out of prerendering
+  const stats = getDashboardStats();
   const all = db.select().from(vehicles).orderBy(vehicles.name).all();
-
-  if (all.length === 0) {
-    return <p className="text-zinc-600 dark:text-zinc-400">Aucun véhicule pour l&apos;instant.</p>;
-  }
+  const recent = listRecentLogs(5);
 
   return (
-    <ul className="flex flex-col divide-y divide-zinc-200 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-      {all.map((v) => (
-        <li key={v.id}>
-          <Link
-            href={`/vehicles/${v.id}`}
-            className="flex items-center justify-between px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-900"
-          >
-            <span className="font-medium">{v.name}</span>
-            <span className="text-sm text-zinc-500">
-              {v.odometer.toLocaleString("fr-CA")} {v.odometerUnit}
-            </span>
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
+        <MetricCard icon={<CarIcon />} label="Véhicules" value={String(stats.vehicleCount)} />
+        <MetricCard
+          icon={<WrenchIcon />}
+          label="Travaux enregistrés"
+          value={String(stats.logCount)}
+        />
+        <MetricCard
+          icon={<CashIcon />}
+          label="Dépenses totales"
+          value={formatCurrency(stats.totalCost)}
+        />
+      </div>
+
+      <Card
+        title="Mes véhicules"
+        action={
+          <Link href="/vehicles" className={linkMuted}>
+            Tout voir
           </Link>
-        </li>
-      ))}
-    </ul>
+        }
+      >
+        <VehicleTable vehicles={all} />
+      </Card>
+
+      <Card title="Travaux récents">
+        {recent.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">Aucun travail enregistré.</p>
+        ) : (
+          <div className={tableWrap}>
+            <table className="w-full min-w-120">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <th className={th}>Travail</th>
+                  <th className={th}>Véhicule</th>
+                  <th className={th}>Date</th>
+                  <th className={`${th} text-end`}>Odomètre</th>
+                  <th className={`${th} text-end`}>Coût</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map((log) => (
+                  <tr key={log.id} className={tr}>
+                    <td className={`${td} font-medium`}>{log.title}</td>
+                    <td className={td}>
+                      <Link href={`/vehicles/${log.vehicleId}`} className="hover:text-brand-500">
+                        {log.vehicleName}
+                      </Link>
+                    </td>
+                    <td className={`${td} text-gray-500 dark:text-gray-400`}>{log.performedAt}</td>
+                    <td className={`${td} text-end`}>
+                      {formatDistance(log.odometer, log.odometerUnit)}
+                    </td>
+                    <td className={`${td} text-end`}>
+                      {log.cost != null ? formatCurrency(log.cost) : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </>
   );
 }
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight">Mes véhicules</h1>
-        <Link
-          href="/vehicles/new"
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          Ajouter
-        </Link>
-      </div>
-      <Suspense fallback={<p className="text-sm text-zinc-500">Chargement…</p>}>
-        <VehicleList />
+    <div className="flex flex-col gap-4 md:gap-6">
+      <PageTitle>Tableau de bord</PageTitle>
+      <Suspense fallback={<p className="text-sm text-gray-500">Chargement…</p>}>
+        <Dashboard />
       </Suspense>
-    </main>
+    </div>
   );
 }

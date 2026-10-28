@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Field, fieldClass as field } from "@/components/form-field";
+import { buttonPrimary, linkMuted } from "@/components/ui";
 import type { LogFormState } from "@/lib/log-form";
 
 type LogFormAction = (prev: LogFormState, formData: FormData) => Promise<LogFormState>;
@@ -66,18 +67,14 @@ export function LogForm({
       </div>
 
       <Field label="Notes" error={errors.notes}>
-        <textarea name="notes" rows={3} defaultValue={values.notes} className={field} />
+        <textarea name="notes" rows={3} defaultValue={values.notes} className={`${field} h-auto`} />
       </Field>
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+        <button type="submit" disabled={pending} className={buttonPrimary}>
           {pending ? "Enregistrement…" : "Enregistrer le travail"}
         </button>
-        <Link href={cancelHref} className="text-sm text-zinc-600 underline dark:text-zinc-400">
+        <Link href={cancelHref} className={linkMuted}>
           Annuler
         </Link>
       </div>

@@ -6,8 +6,21 @@ import { connection } from "next/server";
 import { db } from "@/db";
 import { listLogs } from "@/db/logs";
 import { vehicles } from "@/db/schema";
-
-const TYPE_LABELS = { car: "Auto", motorcycle: "Moto", other: "Autre" } as const;
+import { PlusIcon } from "@/components/icons";
+import {
+  Badge,
+  Card,
+  PageTitle,
+  buttonOutline,
+  buttonPrimary,
+  linkMuted,
+  tableWrap,
+  td,
+  th,
+  tr,
+} from "@/components/ui";
+import { formatCurrency, formatDistance } from "@/lib/format";
+import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 
 async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,80 +38,99 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{vehicle.name}</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            {TYPE_LABELS[vehicle.type]}
-            {subtitle && ` · ${subtitle}`}
-          </p>
+        <div className="flex flex-col gap-2">
+          <PageTitle>{vehicle.name}</PageTitle>
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Badge>{VEHICLE_TYPE_LABELS[vehicle.type]}</Badge>
+            {subtitle}
+          </div>
         </div>
-        <Link
-          href={`/vehicles/${vehicle.id}/edit`}
-          className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium dark:border-zinc-700"
-        >
+        <Link href={`/vehicles/${vehicle.id}/edit`} className={buttonOutline}>
           Modifier
         </Link>
       </div>
-      <dl className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <dt className="text-zinc-500">Odomètre</dt>
-          <dd className="font-medium">
-            {vehicle.odometer.toLocaleString("fr-CA")} {vehicle.odometerUnit}
-          </dd>
-        </div>
-        {vehicle.vin && (
-          <div>
-            <dt className="text-zinc-500">VIN</dt>
-            <dd className="font-medium">{vehicle.vin}</dd>
-          </div>
-        )}
-      </dl>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Historique d&apos;entretien</h2>
-          <Link
-            href={`/vehicles/${vehicle.id}/logs/new`}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-          >
+      <Card>
+        <dl className="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <dt className="text-gray-500 dark:text-gray-400">Odomètre</dt>
+            <dd className="mt-1 font-medium">
+              {formatDistance(vehicle.odometer, vehicle.odometerUnit)}
+            </dd>
+          </div>
+          {vehicle.vin && (
+            <div>
+              <dt className="text-gray-500 dark:text-gray-400">VIN</dt>
+              <dd className="mt-1 font-medium">{vehicle.vin}</dd>
+            </div>
+          )}
+        </dl>
+      </Card>
+
+      <Card
+        title="Historique d'entretien"
+        action={
+          <Link href={`/vehicles/${vehicle.id}/logs/new`} className={buttonPrimary}>
+            <PlusIcon />
             Logger un travail
           </Link>
-        </div>
+        }
+      >
         {logs.length === 0 ? (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">Aucun travail enregistré.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Aucun travail enregistré.</p>
         ) : (
-          <ul className="flex flex-col divide-y divide-zinc-200 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-            {logs.map((log) => (
-              <li key={log.id} className="flex flex-col gap-1 px-4 py-3">
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="font-medium">{log.title}</span>
-                  <span className="text-sm text-zinc-500">{log.performedAt}</span>
-                </div>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {log.odometer.toLocaleString("fr-CA")} {vehicle.odometerUnit}
-                  {log.cost != null &&
-                    ` · ${log.cost.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}`}
-                  {log.shop && ` · ${log.shop}`}
-                </p>
-                {log.notes && <p className="text-sm whitespace-pre-line">{log.notes}</p>}
-              </li>
-            ))}
-          </ul>
+          <div className={tableWrap}>
+            <table className="w-full min-w-140">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-gray-800">
+                  <th className={th}>Travail</th>
+                  <th className={th}>Date</th>
+                  <th className={`${th} text-end`}>Odomètre</th>
+                  <th className={`${th} text-end`}>Coût</th>
+                  <th className={th}>Garage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logs.map((log) => (
+                  <tr key={log.id} className={tr}>
+                    <td className={td}>
+                      <div className="font-medium">{log.title}</div>
+                      {log.notes && (
+                        <div className="mt-0.5 whitespace-pre-line text-gray-500 dark:text-gray-400">
+                          {log.notes}
+                        </div>
+                      )}
+                    </td>
+                    <td className={`${td} whitespace-nowrap text-gray-500 dark:text-gray-400`}>
+                      {log.performedAt}
+                    </td>
+                    <td className={`${td} text-end whitespace-nowrap`}>
+                      {formatDistance(log.odometer, vehicle.odometerUnit)}
+                    </td>
+                    <td className={`${td} text-end whitespace-nowrap`}>
+                      {log.cost != null ? formatCurrency(log.cost) : "—"}
+                    </td>
+                    <td className={`${td} text-gray-500 dark:text-gray-400`}>{log.shop ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </section>
+      </Card>
     </>
   );
 }
 
 export default function VehiclePage(props: PageProps<"/vehicles/[id]">) {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
-      <Link href="/" className="text-sm text-zinc-600 underline dark:text-zinc-400">
-        ← Mes véhicules
+    <div className="flex flex-col gap-4 md:gap-6">
+      <Link href="/vehicles" className={linkMuted}>
+        ← Véhicules
       </Link>
-      <Suspense fallback={<p className="text-sm text-zinc-500">Chargement…</p>}>
+      <Suspense fallback={<p className="text-sm text-gray-500">Chargement…</p>}>
         <VehicleDetails params={props.params} />
       </Suspense>
-    </main>
+    </div>
   );
 }

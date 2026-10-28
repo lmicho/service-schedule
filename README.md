@@ -13,7 +13,7 @@ logger les travaux effectués et suivre un calendrier d'entretien récurrent
 | --- | --- |
 | Framework | Next.js (App Router) + TypeScript |
 | Base de données | SQLite (`better-sqlite3`) + Drizzle ORM |
-| UI | Tailwind CSS |
+| UI | Tailwind CSS 4, style inspiré du template [TailAdmin](https://tailadmin.com) (licence MIT) |
 | Validation | Zod |
 | Tests | Vitest |
 | Qualité | ESLint + Prettier |
@@ -56,6 +56,7 @@ npm run dev                  # http://localhost:3000
 src/
   app/          Pages et layouts (Next.js)
   db/           Schéma Drizzle, connexion SQLite, migrations runner
+  components/   Shell (sidebar, header), composants UI partagés, formulaires
   lib/          Logique métier (ex. due.ts: calcul des échéances)
 drizzle/        Migrations SQL générées
 data/           Base SQLite locale (ignorée par git)

@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
+import { Card, PageTitle } from "@/components/ui";
 import { createLog } from "../../../logs-actions";
 import { LogForm } from "./log-form";
 
@@ -28,25 +29,27 @@ async function NewLog({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Logger un travail</h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">{vehicle.name}</p>
+        <PageTitle>Logger un travail</PageTitle>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{vehicle.name}</p>
       </div>
-      <LogForm
-        action={createLog.bind(null, vehicle.id)}
-        defaults={{ performedAt: todayLocal(), odometer: vehicle.odometer.toString() }}
-        unit={vehicle.odometerUnit}
-        cancelHref={`/vehicles/${vehicle.id}`}
-      />
+      <Card>
+        <LogForm
+          action={createLog.bind(null, vehicle.id)}
+          defaults={{ performedAt: todayLocal(), odometer: vehicle.odometer.toString() }}
+          unit={vehicle.odometerUnit}
+          cancelHref={`/vehicles/${vehicle.id}`}
+        />
+      </Card>
     </>
   );
 }
 
 export default function NewLogPage(props: PageProps<"/vehicles/[id]/logs/new">) {
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-6 py-12">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Chargement…</p>}>
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-4 md:gap-6">
+      <Suspense fallback={<p className="text-sm text-gray-500">Chargement…</p>}>
         <NewLog params={props.params} />
       </Suspense>
-    </main>
+    </div>
   );
 }

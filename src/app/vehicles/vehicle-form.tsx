@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Field, fieldClass as field } from "@/components/form-field";
+import { buttonPrimary, linkMuted } from "@/components/ui";
 import type { VehicleFormState } from "@/lib/vehicle-form";
 
 type VehicleFormAction = (prev: VehicleFormState, formData: FormData) => Promise<VehicleFormState>;
@@ -89,14 +90,10 @@ export function VehicleForm({
       </Field>
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+        <button type="submit" disabled={pending} className={buttonPrimary}>
           {pending ? pendingLabel : submitLabel}
         </button>
-        <Link href={cancelHref} className="text-sm text-zinc-600 underline dark:text-zinc-400">
+        <Link href={cancelHref} className={linkMuted}>
           Annuler
         </Link>
       </div>
