@@ -5,9 +5,11 @@ import { eq } from "drizzle-orm";
 import { connection } from "next/server";
 import { db } from "@/db";
 import { listLogs } from "@/db/logs";
+import { listRulesWithStatus } from "@/db/rules";
 import { vehicles } from "@/db/schema";
 import { PlusIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
+import { RulesTable } from "@/components/rules-table";
 import { Badge, Card, PageTitle, buttonOutline, buttonPrimary, linkMuted } from "@/components/ui";
 import { formatDistance } from "@/lib/format";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
@@ -23,6 +25,7 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
   if (!vehicle) notFound();
 
   const logs = listLogs(vehicle.id);
+  const rules = listRulesWithStatus(vehicle.id);
   const subtitle = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
 
   return (
@@ -55,6 +58,18 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
             </div>
           )}
         </dl>
+      </Card>
+
+      <Card
+        title="Règles d'entretien"
+        action={
+          <Link href={`/vehicles/${vehicle.id}/rules/new`} className={buttonOutline}>
+            <PlusIcon />
+            Ajouter une règle
+          </Link>
+        }
+      >
+        <RulesTable rules={rules} vehicleId={vehicle.id} unit={vehicle.odometerUnit} />
       </Card>
 
       <Card

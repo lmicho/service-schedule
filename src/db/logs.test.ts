@@ -7,6 +7,7 @@ const input = {
   performedAt: "2026-03-01",
   odometer: 10_000,
   cost: null,
+  scheduleItemId: null,
   shop: null,
   notes: null,
 };

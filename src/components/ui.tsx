@@ -5,6 +5,8 @@ export const buttonPrimary = `${buttonBase} bg-brand-500 text-white shadow-theme
 
 export const buttonOutline = `${buttonBase} bg-white text-gray-700 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/3 dark:hover:text-gray-300`;
 
+export const buttonDanger = `${buttonBase} bg-white text-red-600 ring-1 ring-red-200 ring-inset hover:bg-red-50 dark:bg-transparent dark:text-red-400 dark:ring-red-500/30 dark:hover:bg-red-500/10`;
+
 export const linkMuted =
   "text-sm text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400";
 
@@ -62,6 +64,32 @@ export function Badge({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
       {children}
+    </span>
+  );
+}
+
+const STATUS_STYLES = {
+  ok: {
+    label: "OK",
+    className: "bg-green-50 text-green-600 dark:bg-green-500/15 dark:text-green-500",
+  },
+  soon: {
+    label: "Bientôt",
+    className: "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-500",
+  },
+  overdue: {
+    label: "En retard",
+    className: "bg-red-50 text-red-600 dark:bg-red-500/15 dark:text-red-500",
+  },
+} as const;
+
+export function StatusBadge({ status }: { status: keyof typeof STATUS_STYLES }) {
+  const { label, className } = STATUS_STYLES[status];
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${className}`}
+    >
+      {label}
     </span>
   );
 }

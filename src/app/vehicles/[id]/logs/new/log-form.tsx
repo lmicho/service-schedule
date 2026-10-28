@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { Field, fieldClass as field } from "@/components/form-field";
 import { buttonPrimary, linkMuted } from "@/components/ui";
 import type { LogFormState } from "@/lib/log-form";
@@ -11,22 +11,49 @@ type LogFormAction = (prev: LogFormState, formData: FormData) => Promise<LogForm
 export function LogForm({
   action: submit,
   defaults,
+  rules,
   unit,
   cancelHref,
 }: {
   action: LogFormAction;
-  defaults: { performedAt: string; odometer: string };
+  defaults: Record<string, string>;
+  rules: { id: number; name: string }[];
   unit: string;
   cancelHref: string;
 }) {
   const [state, action, pending] = useActionState(submit, {});
   const { errors = {} } = state;
   const values: Record<string, string> = state.values ?? defaults;
+  const titleRef = useRef<HTMLInputElement>(null);
 
   return (
     <form action={action} className="flex flex-col gap-4">
+      {rules.length > 0 && (
+        <Field label="Règle d'entretien" error={errors.scheduleItemId}>
+          <select
+            name="scheduleItemId"
+            defaultValue={values.scheduleItemId ?? ""}
+            onChange={(e) => {
+              const rule = rules.find((r) => String(r.id) === e.target.value);
+              if (rule && titleRef.current && !titleRef.current.value) {
+                titleRef.current.value = rule.name;
+              }
+            }}
+            className={field}
+          >
+            <option value="">Aucune (travail ponctuel)</option>
+            {rules.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+
       <Field label="Travail effectué *" error={errors.title}>
         <input
+          ref={titleRef}
           name="title"
           required
           maxLength={120}

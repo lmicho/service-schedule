@@ -3,6 +3,9 @@ export type DueStatus = "ok" | "soon" | "overdue";
 export interface DueRule {
   intervalDistance?: number | null;
   intervalDays?: number | null;
+  // How long before the deadline to warn; defaults to SOON_RATIO of the interval.
+  warnDistance?: number | null;
+  warnDays?: number | null;
 }
 
 export interface DuePoint {
@@ -18,8 +21,13 @@ export interface DueResult {
   remainingDays: number | null;
 }
 
-// "Soon" kicks in when less than this share of the interval remains.
+// "Soon" kicks in when less than this share of the interval remains,
+// unless the rule sets its own warning distance / days.
 const SOON_RATIO = 0.1;
+
+function soonThreshold(interval: number, warn?: number | null): number {
+  return warn ?? interval * SOON_RATIO;
+}
 
 const MS_PER_DAY = 86_400_000;
 
@@ -48,7 +56,8 @@ export function computeDue(rule: DueRule, from: DuePoint, current: DuePoint): Du
     nextDueOdometer = from.odometer + rule.intervalDistance;
     remainingDistance = nextDueOdometer - current.odometer;
     if (remainingDistance < 0) escalate("overdue");
-    else if (remainingDistance <= rule.intervalDistance * SOON_RATIO) escalate("soon");
+    else if (remainingDistance <= soonThreshold(rule.intervalDistance, rule.warnDistance))
+      escalate("soon");
   }
 
   let nextDueDate: string | null = null;
@@ -57,7 +66,7 @@ export function computeDue(rule: DueRule, from: DuePoint, current: DuePoint): Du
     nextDueDate = addDays(from.date, rule.intervalDays);
     remainingDays = Math.round((toUtcDay(nextDueDate) - toUtcDay(current.date)) / MS_PER_DAY);
     if (remainingDays < 0) escalate("overdue");
-    else if (remainingDays <= rule.intervalDays * SOON_RATIO) escalate("soon");
+    else if (remainingDays <= soonThreshold(rule.intervalDays, rule.warnDays)) escalate("soon");
   }
 
   return { status, nextDueOdometer, nextDueDate, remainingDistance, remainingDays };
