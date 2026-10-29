@@ -5,38 +5,38 @@ export interface RuleTemplate {
   name: string;
   // Distance intervals are in km; see templateIntervals for other units.
   intervalDistance?: number;
-  intervalDays?: number;
+  intervalMonths?: number;
 }
 
 const KM_TO_MI = 0.621371;
 
 export const RULE_TEMPLATES: Record<VehicleType, RuleTemplate[]> = {
   car: [
-    { id: "oil", name: "Changement d'huile", intervalDistance: 8000, intervalDays: 180 },
-    { id: "air-filter", name: "Filtre à air", intervalDistance: 20000, intervalDays: 730 },
-    { id: "brake-fluid", name: "Liquide de frein", intervalDistance: 40000, intervalDays: 730 },
+    { id: "oil", name: "Changement d'huile", intervalDistance: 8000, intervalMonths: 6 },
+    { id: "air-filter", name: "Filtre à air", intervalDistance: 20000, intervalMonths: 24 },
+    { id: "brake-fluid", name: "Liquide de frein", intervalDistance: 40000, intervalMonths: 24 },
     {
       id: "coolant",
       name: "Liquide de refroidissement",
       intervalDistance: 60000,
-      intervalDays: 1095,
+      intervalMonths: 36,
     },
-    { id: "tire-rotation", name: "Rotation des pneus", intervalDistance: 10000, intervalDays: 180 },
+    { id: "tire-rotation", name: "Rotation des pneus", intervalDistance: 10000, intervalMonths: 6 },
     {
       id: "brake-check",
       name: "Inspection des freins",
       intervalDistance: 20000,
-      intervalDays: 365,
+      intervalMonths: 12,
     },
   ],
   motorcycle: [
-    { id: "oil", name: "Changement d'huile", intervalDistance: 6000, intervalDays: 365 },
+    { id: "oil", name: "Changement d'huile", intervalDistance: 6000, intervalMonths: 12 },
     { id: "chain", name: "Graissage de la chaîne", intervalDistance: 600 },
-    { id: "brake-fluid", name: "Liquide de frein", intervalDistance: 20000, intervalDays: 730 },
-    { id: "air-filter", name: "Filtre à air", intervalDistance: 12000, intervalDays: 730 },
+    { id: "brake-fluid", name: "Liquide de frein", intervalDistance: 20000, intervalMonths: 24 },
+    { id: "air-filter", name: "Filtre à air", intervalDistance: 12000, intervalMonths: 24 },
     { id: "spark-plugs", name: "Bougies", intervalDistance: 12000 },
   ],
-  other: [{ id: "general", name: "Entretien général", intervalDays: 365 }],
+  other: [{ id: "general", name: "Entretien général", intervalMonths: 12 }],
 };
 
 export function findTemplate(type: VehicleType, id: string | undefined): RuleTemplate | undefined {

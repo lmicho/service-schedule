@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
+import { deleteVehicle as removeVehicle } from "@/db/vehicles";
 import { parseVehicleForm, type VehicleFormState } from "@/lib/vehicle-form";
 
 export async function createVehicle(
@@ -38,4 +39,11 @@ export async function updateVehicle(
 
   updateTag("vehicles");
   redirect(`/vehicles/${id}`);
+}
+
+export async function deleteVehicle(id: number): Promise<void> {
+  if (!removeVehicle(id)) notFound();
+
+  updateTag("vehicles");
+  redirect("/");
 }

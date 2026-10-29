@@ -37,7 +37,7 @@ async function NewRule({
   const defaults = {
     name: template?.name ?? "",
     intervalDistance: distance?.toString() ?? "",
-    intervalDays: template?.intervalDays?.toString() ?? "",
+    intervalMonths: template?.intervalMonths?.toString() ?? "",
     baselineOdometer: vehicle.odometer.toString(),
     baselineDate: todayLocal(),
   };

@@ -10,9 +10,9 @@ let schema: typeof import("./schema");
 const ruleInput = {
   name: "Huile",
   intervalDistance: 2000,
-  intervalDays: null,
+  intervalMonths: null,
   warnDistance: null,
-  warnDays: null,
+  warnMonths: null,
   baselineOdometer: 10_000,
   baselineDate: "2026-01-01",
   notes: null,

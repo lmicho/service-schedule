@@ -21,7 +21,7 @@ export const vehicles = sqliteTable("vehicles", {
     .default(sql`(date('now'))`),
 });
 
-// Recurring rule, e.g. "Oil change" every 2000 km and/or 180 days.
+// Recurring rule, e.g. "Oil change" every 2000 km and/or 6 months.
 export const scheduleItems = sqliteTable("schedule_items", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   vehicleId: integer("vehicle_id")
@@ -29,10 +29,10 @@ export const scheduleItems = sqliteTable("schedule_items", {
     .references(() => vehicles.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   intervalDistance: integer("interval_distance"),
-  intervalDays: integer("interval_days"),
-  // Warn this long before the deadline; null = 10% of the interval.
+  intervalMonths: integer("interval_months"),
+  // Warn this long before the deadline (months for the time interval); null = 10% of the interval.
   warnDistance: integer("warn_distance"),
-  warnDays: integer("warn_days"),
+  warnMonths: integer("warn_months"),
   // Where counting starts until a job is logged against the rule.
   baselineOdometer: integer("baseline_odometer").notNull().default(0),
   baselineDate: text("baseline_date"), // YYYY-MM-DD

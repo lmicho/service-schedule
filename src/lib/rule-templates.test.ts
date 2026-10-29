@@ -5,7 +5,7 @@ describe("rule templates", () => {
   it("every template has at least one interval and ids are unique per type", () => {
     for (const list of Object.values(RULE_TEMPLATES)) {
       expect(new Set(list.map((t) => t.id)).size).toBe(list.length);
-      for (const t of list) expect(t.intervalDistance || t.intervalDays).toBeTruthy();
+      for (const t of list) expect(t.intervalDistance || t.intervalMonths).toBeTruthy();
     }
   });
 

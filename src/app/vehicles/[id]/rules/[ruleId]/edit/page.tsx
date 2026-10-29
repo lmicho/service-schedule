@@ -36,9 +36,9 @@ async function EditRule({ params }: { params: Promise<{ id: string; ruleId: stri
           defaults={{
             name: rule.name,
             intervalDistance: rule.intervalDistance?.toString() ?? "",
-            intervalDays: rule.intervalDays?.toString() ?? "",
+            intervalMonths: rule.intervalMonths?.toString() ?? "",
             warnDistance: rule.warnDistance?.toString() ?? "",
-            warnDays: rule.warnDays?.toString() ?? "",
+            warnMonths: rule.warnMonths?.toString() ?? "",
             baselineOdometer: rule.baselineOdometer.toString(),
             baselineDate: rule.baselineDate ?? "",
             notes: rule.notes ?? "",

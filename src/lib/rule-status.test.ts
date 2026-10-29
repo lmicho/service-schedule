@@ -7,9 +7,9 @@ const rule: ScheduleItem = {
   vehicleId: 1,
   name: "Huile",
   intervalDistance: 2000,
-  intervalDays: null,
+  intervalMonths: null,
   warnDistance: null,
-  warnDays: null,
+  warnMonths: null,
   baselineOdometer: 10_000,
   baselineDate: "2026-01-01",
   notes: null,
@@ -33,20 +33,20 @@ describe("computeRuleStatus", () => {
   });
 
   it("falls back to today when the rule has no baseline date", () => {
-    const timed = { ...rule, intervalDistance: null, intervalDays: 30, baselineDate: null };
+    const timed = { ...rule, intervalDistance: null, intervalMonths: 1, baselineDate: null };
     const r = computeRuleStatus(timed, null, { odometer: 0 }, "2026-05-01");
-    expect(r).toMatchObject({ status: "ok", nextDueDate: "2026-05-31" });
+    expect(r).toMatchObject({ status: "ok", nextDueDate: "2026-06-01" });
   });
 
   it("only tracks time when the last job has no odometer reading", () => {
-    const both = { ...rule, intervalDays: 180 };
+    const both = { ...rule, intervalMonths: 6 };
     const last = { odometer: null, performedAt: "2026-02-01" };
     const r = computeRuleStatus(both, last, { odometer: 99_999 }, "2026-02-10");
     expect(r).toMatchObject({
       status: "ok",
       nextDueOdometer: null,
       remainingDistance: null,
-      nextDueDate: "2026-07-31",
+      nextDueDate: "2026-08-01",
     });
   });
 });

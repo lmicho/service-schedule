@@ -54,12 +54,12 @@ export function RuleForm({
               className={field}
             />
           </Field>
-          <Field label="Jours" error={errors.intervalDays}>
+          <Field label="Mois" error={errors.intervalMonths}>
             <input
-              name="intervalDays"
+              name="intervalMonths"
               inputMode="numeric"
-              placeholder="180"
-              defaultValue={values.intervalDays}
+              placeholder="6"
+              defaultValue={values.intervalMonths}
               className={field}
             />
           </Field>
@@ -79,11 +79,11 @@ export function RuleForm({
               className={field}
             />
           </Field>
-          <Field label="Jours" error={errors.warnDays}>
+          <Field label="Mois" error={errors.warnMonths}>
             <input
-              name="warnDays"
+              name="warnMonths"
               inputMode="numeric"
-              defaultValue={values.warnDays}
+              defaultValue={values.warnMonths}
               className={field}
             />
           </Field>
