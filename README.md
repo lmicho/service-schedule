@@ -32,8 +32,7 @@ un seul fichier à sauvegarder.
 ```bash
 npm install
 cp .env.example .env.local   # optionnel
-npm run db:migrate           # crée data/service-schedule.db
-npm run dev                  # http://localhost:3000
+npm run dev                  # http://localhost:3000 (crée et migre data/service-schedule.db)
 ```
 
 ## Scripts
@@ -47,7 +46,7 @@ npm run dev                  # http://localhost:3000
 | `npm run typecheck` | Vérification TypeScript |
 | `npm run format` | Prettier |
 | `npm run db:generate` | Génère une migration depuis `src/db/schema.ts` |
-| `npm run db:migrate` | Applique les migrations |
+| `npm run db:migrate` | Applique les migrations à la main (elles le sont déjà au démarrage de l'app) |
 | `npm run db:studio` | Explorateur de base de données (Drizzle Studio) |
 
 ## Structure
