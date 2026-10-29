@@ -21,9 +21,11 @@ function Logo() {
 
 export function AppShell({
   vehicleNav,
+  alertBell,
   children,
 }: {
   vehicleNav: React.ReactNode;
+  alertBell: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -43,8 +45,16 @@ export function AppShell({
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="py-8">
+        <div className="flex items-center justify-between gap-2 py-8">
           <Logo />
+          {/* Server-rendered slot: close the mobile drawer when a panel link is clicked */}
+          <div
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest("a")) setOpen(false);
+            }}
+          >
+            {alertBell}
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           <Suspense fallback={null}>

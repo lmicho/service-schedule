@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeDue, describeInterval } from "./format";
+import { describeDue, describeInterval, describeRemaining } from "./format";
 
 const base = {
   status: "ok" as const,
@@ -43,5 +43,16 @@ describe("describeInterval", () => {
     expect(describeInterval({ intervalDistance: null, intervalDays: 365 }, "km")).toBe(
       "tous les 365 j",
     );
+  });
+});
+
+describe("describeRemaining", () => {
+  it("joins the remaining distance and days", () => {
+    const text = describeRemaining({ ...base, remainingDistance: -1300, remainingDays: 12 }, "km");
+    expect(text).toMatch(/^en retard de 1.300 km · dans 12 j$/);
+  });
+
+  it("handles a single interval", () => {
+    expect(describeRemaining({ ...base, remainingDays: 5 }, "km")).toBe("dans 5 j");
   });
 });

@@ -1,5 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const VEHICLE_TYPES = ["car", "motorcycle", "other"] as const;
 export const ODOMETER_UNITS = ["km", "mi"] as const;
@@ -55,6 +55,22 @@ export const maintenanceLogs = sqliteTable("maintenance_logs", {
   shop: text("shop"),
   notes: text("notes"),
 });
+
+// A closed alert. cycleKey (see lib/alerts.ts) ties the dismissal to one status
+// and deadline, so the alert comes back once either changes.
+export const alertDismissals = sqliteTable(
+  "alert_dismissals",
+  {
+    scheduleItemId: integer("schedule_item_id")
+      .notNull()
+      .references(() => scheduleItems.id, { onDelete: "cascade" }),
+    cycleKey: text("cycle_key").notNull(),
+    dismissedAt: text("dismissed_at")
+      .notNull()
+      .default(sql`(date('now'))`),
+  },
+  (t) => [primaryKey({ columns: [t.scheduleItemId, t.cycleKey] })],
+);
 
 export const vehiclesRelations = relations(vehicles, ({ many }) => ({
   scheduleItems: many(scheduleItems),

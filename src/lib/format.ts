@@ -27,6 +27,20 @@ export function describeDue(due: DueResult, unit: string): string[] {
   return lines;
 }
 
+/** "en retard de 300 km · dans 12 j": what is left on each interval the rule uses. */
+export function describeRemaining(due: DueResult, unit: string): string {
+  const parts: string[] = [];
+  if (due.remainingDistance !== null) {
+    parts.push(
+      remaining(due.remainingDistance, unit).replace(/\d+/, (n) =>
+        Number(n).toLocaleString("fr-CA"),
+      ),
+    );
+  }
+  if (due.remainingDays !== null) parts.push(remaining(due.remainingDays, "j"));
+  return parts.join(" · ");
+}
+
 /** "tous les 5 000 km · tous les 180 j" */
 export function describeInterval(
   rule: { intervalDistance: number | null; intervalDays: number | null },

@@ -102,3 +102,12 @@ export function PencilIcon({ className = "size-4" }: IconProps) {
     </svg>
   );
 }
+
+export function BellIcon({ className = "size-5" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6 9.5a6 6 0 1112 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5z" />
+      <path d="M10 19.5a2.2 2.2 0 004 0" />
+    </svg>
+  );
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Outfit } from "next/font/google";
+import { AlertBell } from "@/components/alert-bell";
 import { AppShell } from "@/components/app-shell";
 import { InlineScript } from "@/components/inline-script";
 import { VehicleNav } from "@/components/vehicle-nav";
@@ -27,6 +28,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="h-full">
         <AppShell
+          alertBell={
+            <Suspense fallback={null}>
+              <AlertBell />
+            </Suspense>
+          }
           vehicleNav={
             <Suspense fallback={null}>
               <VehicleNav />
