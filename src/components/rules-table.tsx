@@ -36,7 +36,14 @@ export function RulesTable({
         <tbody>
           {rules.map((rule) => (
             <tr key={rule.id} className={tr}>
-              <td className={`${td} font-medium`}>{rule.name}</td>
+              <td className={`${td} font-medium`}>
+                <Link
+                  href={`/vehicles/${vehicleId}/rules/${rule.id}`}
+                  className="hover:text-brand-500 dark:hover:text-brand-400"
+                >
+                  {rule.name}
+                </Link>
+              </td>
               <td className={`${td} text-gray-500 dark:text-gray-400`}>
                 {describeInterval(rule, unit)}
               </td>

@@ -58,3 +58,14 @@ export function describeInterval(
   if (rule.intervalMonths) parts.push(`tous les ${rule.intervalMonths} mois`);
   return parts.join(" · ");
 }
+
+/** "600 km avant · 1 mois avant", or the default when the rule sets no warning of its own. */
+export function describeWarning(
+  rule: { warnDistance: number | null; warnMonths: number | null },
+  unit: string,
+): string {
+  const parts: string[] = [];
+  if (rule.warnDistance) parts.push(`${formatDistance(rule.warnDistance, unit)} avant`);
+  if (rule.warnMonths) parts.push(`${rule.warnMonths} mois avant`);
+  return parts.length > 0 ? parts.join(" · ") : "10 % de l'intervalle (par défaut)";
+}
