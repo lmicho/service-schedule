@@ -9,6 +9,7 @@ import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { Card, PageTitle, buttonDanger } from "@/components/ui";
 import { deleteLog, updateLog } from "../../../../logs-actions";
 import { LogForm } from "../../new/log-form";
+import { vehicleTabHref } from "@/lib/vehicle-tabs";
 
 export const metadata = { title: "Modifier le travail" };
 
@@ -51,7 +52,7 @@ async function EditLog({ params }: { params: Promise<{ id: string; logId: string
           }}
           rules={rules}
           unit={vehicle.odometerUnit}
-          cancelHref={`/vehicles/${vehicle.id}`}
+          cancelHref={vehicleTabHref(vehicle.id, "history")}
           submitLabel="Enregistrer"
         />
       </Card>

@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { scheduleItems, vehicles } from "@/db/schema";
 import { Card, PageTitle } from "@/components/ui";
 import { todayLocal } from "@/lib/date";
+import { vehicleTabHref } from "@/lib/vehicle-tabs";
 import { createLog } from "../../../logs-actions";
 import { LogForm } from "./log-form";
 
@@ -54,7 +55,7 @@ async function NewLog({
           }}
           rules={rules}
           unit={vehicle.odometerUnit}
-          cancelHref={`/vehicles/${vehicle.id}`}
+          cancelHref={vehicleTabHref(vehicle.id, "history")}
         />
       </Card>
     </>

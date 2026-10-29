@@ -29,6 +29,8 @@ export function LogFiltersForm({
 
   return (
     <form method="get" className="mb-4 flex flex-col gap-3">
+      {/* Submitting replaces the query string: stay on the history tab. */}
+      <input type="hidden" name="tab" value="history" />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Recherche">
           <input
