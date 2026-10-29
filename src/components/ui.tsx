@@ -42,20 +42,30 @@ export function MetricCard({
   icon,
   label,
   value,
+  className = "",
+  detail,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  className?: string;
+  /** Shown beside the value from `sm` up, below it on narrow screens. */
+  detail?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 dark:border-gray-800 dark:bg-white/3">
-      <div className="flex size-12 items-center justify-center rounded-xl bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white/90">
-        {icon}
+    <div
+      className={`flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:flex-row sm:justify-between md:p-5 dark:border-gray-800 dark:bg-white/3 ${className}`}
+    >
+      <div>
+        <div className="flex size-10 items-center justify-center rounded-xl bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-white/90">
+          {icon}
+        </div>
+        <div className="mt-3">
+          <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
+          <h4 className="mt-1 text-title-sm font-bold text-gray-800 dark:text-white/90">{value}</h4>
+        </div>
       </div>
-      <div className="mt-5">
-        <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-        <h4 className="mt-2 text-title-sm font-bold text-gray-800 dark:text-white/90">{value}</h4>
-      </div>
+      {detail}
     </div>
   );
 }

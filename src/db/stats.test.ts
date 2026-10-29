@@ -59,3 +59,22 @@ describe("listVehiclesWithRecentLogs", () => {
     expect(names).toEqual([...names].sort());
   });
 });
+
+describe("listCostByVehicle", () => {
+  it("sums costs per vehicle, biggest first, with 0 for vehicles without costs", () => {
+    const a = addVehicle("A-cost");
+    const b = addVehicle("B-cost");
+    const c = addVehicle("C-cost");
+    logs.insertLog(a.id, { ...base, title: "x", cost: 100 });
+    logs.insertLog(a.id, { ...base, title: "y", cost: 50.5 });
+    logs.insertLog(a.id, { ...base, title: "free", cost: null });
+    logs.insertLog(b.id, { ...base, title: "z", cost: 400 });
+
+    const rows = stats.listCostByVehicle().filter((r) => [a.id, b.id, c.id].includes(r.id));
+    expect(rows.map((r) => [r.name, r.cost])).toEqual([
+      ["B-cost", 400],
+      ["A-cost", 150.5],
+      ["C-cost", 0],
+    ]);
+  });
+});
