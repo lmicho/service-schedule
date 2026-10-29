@@ -8,6 +8,7 @@ import { listLogs } from "@/db/logs";
 import { listRulesWithStatus } from "@/db/rules";
 import { vehicles } from "@/db/schema";
 import { PlusIcon } from "@/components/icons";
+import { LogFiltersForm } from "@/components/log-filters";
 import { LogsTable } from "@/components/logs-table";
 import { RulesTable } from "@/components/rules-table";
 import { Badge, Card, PageTitle, buttonOutline, buttonPrimary, linkMuted } from "@/components/ui";
@@ -15,9 +16,17 @@ import { OdometerQuickEdit } from "@/components/odometer-quick-edit";
 import { isStale, todayLocal } from "@/lib/date";
 import { updateOdometer } from "../actions";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { filterLogs, hasActiveFilters, logYears, parseLogFilters } from "@/lib/log-filters";
 
-async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
+async function VehicleDetails({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { id } = await params;
+  const filters = parseLogFilters(await searchParams);
   await connection(); // sync SQLite driver: keep the query out of prerendering
 
   const vehicleId = Number(id);
@@ -28,6 +37,7 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
 
   const logs = listLogs(vehicle.id);
   const rules = listRulesWithStatus(vehicle.id);
+  const shownLogs = filterLogs(logs, filters);
   const subtitle = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
 
   return (
@@ -89,7 +99,23 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
           </Link>
         }
       >
-        <LogsTable logs={logs} unit={vehicle.odometerUnit} />
+        {logs.length > 0 && (
+          <LogFiltersForm
+            filters={filters}
+            years={logYears(logs)}
+            rules={rules.map((r) => ({ id: r.id, name: r.name }))}
+            resetHref={`/vehicles/${vehicle.id}`}
+            shown={shownLogs.length}
+            total={logs.length}
+          />
+        )}
+        {shownLogs.length === 0 && logs.length > 0 && hasActiveFilters(filters) ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Aucun travail ne correspond aux filtres.
+          </p>
+        ) : (
+          <LogsTable logs={shownLogs} unit={vehicle.odometerUnit} />
+        )}
       </Card>
     </>
   );
@@ -102,7 +128,7 @@ export default function VehiclePage(props: PageProps<"/vehicles/[id]">) {
         ← Tableau de bord
       </Link>
       <Suspense fallback={<p className="text-sm text-gray-500">Chargement…</p>}>
-        <VehicleDetails params={props.params} />
+        <VehicleDetails params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </div>
   );
