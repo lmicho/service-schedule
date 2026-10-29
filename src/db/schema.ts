@@ -3,8 +3,10 @@ import { integer, primaryKey, real, sqliteTable, text } from "drizzle-orm/sqlite
 
 export const VEHICLE_TYPES = ["car", "motorcycle", "other"] as const;
 export const ODOMETER_UNITS = ["km", "mi"] as const;
+export const RETIRED_REASONS = ["sold", "total_loss", "stolen", "other"] as const;
 
 export type VehicleType = (typeof VEHICLE_TYPES)[number];
+export type RetiredReason = (typeof RETIRED_REASONS)[number];
 
 export const vehicles = sqliteTable("vehicles", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -18,6 +20,9 @@ export const vehicles = sqliteTable("vehicles", {
   odometerUnit: text("odometer_unit", { enum: ODOMETER_UNITS }).notNull().default("km"),
   // When the odometer value was last set (YYYY-MM-DD); null = unknown.
   odometerUpdatedAt: text("odometer_updated_at"),
+  // A retired vehicle (sold, lost, ...) keeps its history but raises no alerts.
+  retiredAt: text("retired_at"), // YYYY-MM-DD; null = active
+  retiredReason: text("retired_reason", { enum: RETIRED_REASONS }),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(date('now'))`),

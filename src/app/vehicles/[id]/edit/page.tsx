@@ -5,7 +5,9 @@ import { Suspense } from "react";
 import { db } from "@/db";
 import { vehicles } from "@/db/schema";
 import { getVehicleUsage } from "@/db/vehicles";
-import { updateVehicle, deleteVehicle } from "../../actions";
+import { deleteVehicle, retireVehicle, updateVehicle } from "../../actions";
+import { RetireForm } from "../../retire-form";
+import { todayLocal } from "@/lib/date";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { Card, PageTitle, buttonDanger } from "@/components/ui";
 import { VehicleForm } from "../../vehicle-form";
@@ -46,6 +48,19 @@ async function EditVehicleForm({ params }: { params: Promise<{ id: string }> }) 
           cancelHref={`/vehicles/${vehicle.id}`}
         />
       </Card>
+      {vehicle.retiredAt === null && (
+        <Card title="Retirer ce véhicule">
+          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+            Vendu, perdu ou volé: le véhicule n&apos;est plus actif, ses alertes s&apos;arrêtent,
+            mais tout son historique est conservé.
+          </p>
+          <RetireForm
+            action={retireVehicle.bind(null, vehicle.id)}
+            today={todayLocal()}
+            vehicleName={vehicle.name}
+          />
+        </Card>
+      )}
       <Card title="Supprimer ce véhicule">
         <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
           Supprime aussi {contents}. Cette action est irréversible.

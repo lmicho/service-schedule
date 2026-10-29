@@ -43,6 +43,13 @@
       "when": 1793246144502,
       "tag": "0005_amused_starjammers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1793250490175,
+      "tag": "0006_public_raider",
+      "breakpoints": true
     }
   ]
 }

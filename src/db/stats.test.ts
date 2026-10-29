@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.stubEnv("DATABASE_PATH", ":memory:");
@@ -71,6 +72,17 @@ describe("listCostByVehicle", () => {
     logs.insertLog(b.id, { ...base, title: "z", cost: 400 });
 
     const rows = stats.listCostByVehicle().filter((r) => [a.id, b.id, c.id].includes(r.id));
+    db.update(schema.vehicles)
+      .set({ retiredAt: "2026-01-01", retiredReason: "sold" })
+      .where(eq(schema.vehicles.id, b.id))
+      .run();
+    const again = stats.listCostByVehicle().filter((r) => r.id === b.id);
+    expect(again[0].retired).toBe(true);
+    db.update(schema.vehicles)
+      .set({ retiredAt: null, retiredReason: null })
+      .where(eq(schema.vehicles.id, b.id))
+      .run();
+
     expect(rows.map((r) => [r.name, r.cost])).toEqual([
       ["B-cost", 400],
       ["A-cost", 150.5],

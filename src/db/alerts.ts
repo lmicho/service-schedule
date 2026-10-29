@@ -28,6 +28,7 @@ export function listActiveAlerts(today = todayLocal()): Alert[] {
 
   const alerts: Alert[] = [];
   for (const vehicle of db.select().from(vehicles).all()) {
+    if (vehicle.retiredAt !== null) continue; // retired vehicles raise no alerts
     for (const rule of listRulesWithStatus(vehicle.id, today)) {
       if (rule.due.status === "ok") continue;
       const key = cycleKey(rule.due);

@@ -80,6 +80,25 @@ describe("saveVehicle", () => {
   });
 });
 
+describe("retireVehicle / reactivateVehicle", () => {
+  it("retires and reactivates a vehicle, keeping its logs", () => {
+    const v = addVehicle("Retire me");
+    addLog(v.id);
+
+    expect(mod.retireVehicle(v.id, { reason: "sold", retiredAt: "2026-05-01" })).toBe(true);
+    expect(readVehicle(v.id)).toMatchObject({ retiredAt: "2026-05-01", retiredReason: "sold" });
+    expect(mod.getVehicleUsage(v.id).logs).toBe(1);
+
+    expect(mod.reactivateVehicle(v.id)).toBe(true);
+    expect(readVehicle(v.id)).toMatchObject({ retiredAt: null, retiredReason: null });
+  });
+
+  it("reports unknown vehicles", () => {
+    expect(mod.retireVehicle(9999, { reason: "other", retiredAt: "2026-05-01" })).toBe(false);
+    expect(mod.reactivateVehicle(9999)).toBe(false);
+  });
+});
+
 describe("deleteVehicle", () => {
   it("removes the vehicle with its logs, rules and dismissals, and nothing else", () => {
     const gone = addVehicle("Gone");

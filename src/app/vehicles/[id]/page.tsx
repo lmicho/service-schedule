@@ -14,8 +14,9 @@ import { RulesTable } from "@/components/rules-table";
 import { Badge, Card, PageTitle, buttonOutline, buttonPrimary, linkMuted } from "@/components/ui";
 import { OdometerQuickEdit } from "@/components/odometer-quick-edit";
 import { isStale, todayLocal } from "@/lib/date";
-import { updateOdometer } from "../actions";
-import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { reactivateVehicle, updateOdometer } from "../actions";
+import { formatDistance } from "@/lib/format";
+import { RETIRED_REASON_LABELS, VEHICLE_TYPE_LABELS } from "@/lib/labels";
 import { filterLogs, hasActiveFilters, logYears, parseLogFilters } from "@/lib/log-filters";
 
 async function VehicleDetails({
@@ -38,6 +39,7 @@ async function VehicleDetails({
   const logs = listLogs(vehicle.id);
   const rules = listRulesWithStatus(vehicle.id);
   const shownLogs = filterLogs(logs, filters);
+  const retired = vehicle.retiredAt !== null;
   const subtitle = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
 
   return (
@@ -47,6 +49,7 @@ async function VehicleDetails({
           <PageTitle>{vehicle.name}</PageTitle>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <Badge>{VEHICLE_TYPE_LABELS[vehicle.type]}</Badge>
+            {retired && <Badge tone="muted">Retiré</Badge>}
             {subtitle}
           </div>
         </div>
@@ -55,18 +58,41 @@ async function VehicleDetails({
         </Link>
       </div>
 
+      {retired && vehicle.retiredReason && (
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="font-medium">
+                Retiré le {vehicle.retiredAt} · {RETIRED_REASON_LABELS[vehicle.retiredReason]}
+              </span>
+              <br />
+              L&apos;historique est conservé; ce véhicule n&apos;a plus d&apos;alertes.
+            </p>
+            <form action={reactivateVehicle.bind(null, vehicle.id)}>
+              <button type="submit" className={buttonOutline}>
+                Réactiver
+              </button>
+            </form>
+          </div>
+        </Card>
+      )}
+
       <Card>
         <dl className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <dt className="text-gray-500 dark:text-gray-400">Odomètre</dt>
             <dd className="mt-1 font-medium">
-              <OdometerQuickEdit
-                action={updateOdometer.bind(null, vehicle.id)}
-                odometer={vehicle.odometer}
-                unit={vehicle.odometerUnit}
-                updatedAt={vehicle.odometerUpdatedAt}
-                stale={isStale(vehicle.odometerUpdatedAt, todayLocal())}
-              />
+              {retired ? (
+                formatDistance(vehicle.odometer, vehicle.odometerUnit)
+              ) : (
+                <OdometerQuickEdit
+                  action={updateOdometer.bind(null, vehicle.id)}
+                  odometer={vehicle.odometer}
+                  unit={vehicle.odometerUnit}
+                  updatedAt={vehicle.odometerUpdatedAt}
+                  stale={isStale(vehicle.odometerUpdatedAt, todayLocal())}
+                />
+              )}
             </dd>
           </div>
           {vehicle.vin && (
@@ -78,17 +104,19 @@ async function VehicleDetails({
         </dl>
       </Card>
 
-      <Card
-        title="Règles d'entretien"
-        action={
-          <Link href={`/vehicles/${vehicle.id}/rules/new`} className={buttonOutline}>
-            <PlusIcon />
-            Ajouter une règle
-          </Link>
-        }
-      >
-        <RulesTable rules={rules} vehicleId={vehicle.id} unit={vehicle.odometerUnit} />
-      </Card>
+      {!retired && (
+        <Card
+          title="Règles d'entretien"
+          action={
+            <Link href={`/vehicles/${vehicle.id}/rules/new`} className={buttonOutline}>
+              <PlusIcon />
+              Ajouter une règle
+            </Link>
+          }
+        >
+          <RulesTable rules={rules} vehicleId={vehicle.id} unit={vehicle.odometerUnit} />
+        </Card>
+      )}
 
       <Card
         title="Historique d'entretien"
