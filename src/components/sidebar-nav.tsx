@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CarIcon, GridIcon } from "./icons";
+import { GridIcon } from "./icons";
 
 const items = [
   { href: "/", label: "Tableau de bord", icon: GridIcon, exact: true },
-  { href: "/vehicles", label: "Tous les véhicules", icon: CarIcon, exact: true },
 ];
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {

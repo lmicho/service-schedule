@@ -13,7 +13,7 @@ export default function NewVehiclePage() {
           action={createVehicle}
           submitLabel="Ajouter le véhicule"
           pendingLabel="Ajout…"
-          cancelHref="/vehicles"
+          cancelHref="/"
         />
       </Card>
     </div>
