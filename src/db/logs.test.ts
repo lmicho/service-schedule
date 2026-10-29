@@ -82,3 +82,54 @@ describe("listLogs", () => {
     expect(mod.listLogs(a.id).map((l) => l.title)).toEqual(["new", "old"]);
   });
 });
+
+describe("updateLog", () => {
+  it("edits the job in place", () => {
+    const v = addVehicle(0);
+    const log = mod.insertLog(v.id, input)!;
+    const updated = mod.updateLog(v.id, log.id, { ...input, title: "Filtre", odometer: null });
+    expect(updated).toMatchObject({ id: log.id, title: "Filtre", odometer: null });
+    expect(mod.getLog(v.id, log.id)?.title).toBe("Filtre");
+  });
+
+  it("returns null for a log of another vehicle", () => {
+    const a = addVehicle(0);
+    const b = addVehicle(0);
+    const log = mod.insertLog(a.id, input)!;
+    expect(mod.updateLog(b.id, log.id, { ...input, title: "x" })).toBeNull();
+    expect(mod.getLog(a.id, log.id)?.title).toBe("Huile");
+  });
+
+  it("raises but never lowers the vehicle odometer", () => {
+    const v = addVehicle(50_000);
+    const log = mod.insertLog(v.id, input)!;
+    mod.updateLog(v.id, log.id, { ...input, odometer: 20_000 });
+    expect(
+      db
+        .select()
+        .from(schema.vehicles)
+        .all()
+        .find((x) => x.id === v.id)?.odometer,
+    ).toBe(50_000);
+    mod.updateLog(v.id, log.id, { ...input, odometer: 60_000 });
+    expect(
+      db
+        .select()
+        .from(schema.vehicles)
+        .all()
+        .find((x) => x.id === v.id)?.odometer,
+    ).toBe(60_000);
+  });
+
+  it("rejects a rule from another vehicle", () => {
+    const a = addVehicle(0);
+    const b = addVehicle(0);
+    const rule = db
+      .insert(schema.scheduleItems)
+      .values({ vehicleId: b.id, name: "R", intervalDays: 30 })
+      .returning()
+      .get();
+    const log = mod.insertLog(a.id, input)!;
+    expect(() => mod.updateLog(a.id, log.id, { ...input, scheduleItemId: rule.id })).toThrow();
+  });
+});
