@@ -26,7 +26,14 @@ export function LogsTable({ logs, unit }: { logs: MaintenanceLog[]; unit: string
           {logs.map((log) => (
             <tr key={log.id} className={tr}>
               <td className={td}>
-                <div className="font-medium">{log.title}</div>
+                <div className="font-medium">
+                  <Link
+                    href={`/vehicles/${log.vehicleId}/logs/${log.id}`}
+                    className="hover:text-brand-500 dark:hover:text-brand-400"
+                  >
+                    {log.title}
+                  </Link>
+                </div>
                 {log.notes && (
                   <div className="mt-0.5 whitespace-pre-line text-gray-500 dark:text-gray-400">
                     {log.notes}

@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { listLogs } from "@/db/logs";
 import { listRulesWithStatus } from "@/db/rules";
 import { vehicles } from "@/db/schema";
+import { Detail } from "@/components/detail";
 import { PencilIcon, PlusIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
 import {
@@ -123,15 +124,6 @@ async function RuleDetails({ params }: { params: Promise<{ id: string; ruleId: s
         )}
       </Card>
     </>
-  );
-}
-
-function Detail({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="text-gray-500 dark:text-gray-400">{label}</dt>
-      <dd className="mt-1 font-medium text-gray-800 dark:text-white/90">{children}</dd>
-    </div>
   );
 }
 
