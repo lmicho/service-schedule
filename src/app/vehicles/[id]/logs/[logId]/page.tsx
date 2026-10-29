@@ -11,6 +11,7 @@ import { Detail } from "@/components/detail";
 import { PencilIcon } from "@/components/icons";
 import { Card, PageTitle, buttonOutline, linkMuted } from "@/components/ui";
 import { formatCurrency, formatDistance } from "@/lib/format";
+import { vehicleTabHref } from "@/lib/vehicle-tabs";
 
 async function LogDetails({ params }: { params: Promise<{ id: string; logId: string }> }) {
   const { id, logId } = await params;
@@ -30,7 +31,7 @@ async function LogDetails({ params }: { params: Promise<{ id: string; logId: str
   return (
     <>
       <div className="flex flex-col gap-2">
-        <Link href={`/vehicles/${vehicle.id}`} className={linkMuted}>
+        <Link href={vehicleTabHref(vehicle.id, "history")} className={linkMuted}>
           ← {vehicle.name}
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-4">

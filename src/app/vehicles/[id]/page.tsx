@@ -8,6 +8,7 @@ import { listLogs } from "@/db/logs";
 import { listRulesWithStatus } from "@/db/rules";
 import { vehicles } from "@/db/schema";
 import { PlusIcon } from "@/components/icons";
+import { TabNav } from "@/components/tab-nav";
 import { LogFiltersForm } from "@/components/log-filters";
 import { LogsTable } from "@/components/logs-table";
 import { RulesTable } from "@/components/rules-table";
@@ -18,6 +19,7 @@ import { reactivateVehicle, updateOdometer } from "../actions";
 import { formatDistance } from "@/lib/format";
 import { RETIRED_REASON_LABELS, VEHICLE_TYPE_LABELS } from "@/lib/labels";
 import { filterLogs, hasActiveFilters, logYears, parseLogFilters } from "@/lib/log-filters";
+import { parseVehicleTab, vehicleTabHref } from "@/lib/vehicle-tabs";
 
 async function VehicleDetails({
   params,
@@ -27,7 +29,8 @@ async function VehicleDetails({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id } = await params;
-  const filters = parseLogFilters(await searchParams);
+  const query = await searchParams;
+  const filters = parseLogFilters(query);
   await connection(); // sync SQLite driver: keep the query out of prerendering
 
   const vehicleId = Number(id);
@@ -40,6 +43,10 @@ async function VehicleDetails({
   const rules = listRulesWithStatus(vehicle.id);
   const shownLogs = filterLogs(logs, filters);
   const retired = vehicle.retiredAt !== null;
+  const tab = parseVehicleTab(query, {
+    hasRulesTab: !retired,
+    hasFilters: hasActiveFilters(filters),
+  });
   const subtitle = [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ");
 
   return (
@@ -104,45 +111,70 @@ async function VehicleDetails({
         </dl>
       </Card>
 
-      {!retired && (
-        <Card
-          title="Règles d'entretien"
-          action={
-            <Link href={`/vehicles/${vehicle.id}/rules/new`} className={buttonOutline}>
-              <PlusIcon />
-              Ajouter une règle
-            </Link>
-          }
-        >
-          <RulesTable rules={rules} vehicleId={vehicle.id} unit={vehicle.odometerUnit} />
-        </Card>
-      )}
+      <Card>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b border-gray-200 pb-3 dark:border-gray-800">
+          {retired ? (
+            <h2 className="py-3 text-lg font-semibold text-gray-800 dark:text-white/90">
+              Historique d&apos;entretien
+            </h2>
+          ) : (
+            <TabNav
+              active={tab}
+              tabs={[
+                {
+                  id: "rules",
+                  label: "Règles d'entretien",
+                  shortLabel: "Règles",
+                  count: rules.length,
+                  href: vehicleTabHref(vehicle.id, "rules"),
+                },
+                {
+                  id: "history",
+                  label: "Historique d'entretien",
+                  shortLabel: "Historique",
+                  count: logs.length,
+                  href: vehicleTabHref(vehicle.id, "history"),
+                },
+              ]}
+            />
+          )}
+          <div>
+            {tab === "rules" ? (
+              <Link href={`/vehicles/${vehicle.id}/rules/new`} className={buttonOutline}>
+                <PlusIcon />
+                Ajouter une règle
+              </Link>
+            ) : (
+              <Link href={`/vehicles/${vehicle.id}/logs/new`} className={buttonPrimary}>
+                <PlusIcon />
+                Logger un travail
+              </Link>
+            )}
+          </div>
+        </div>
 
-      <Card
-        title="Historique d'entretien"
-        action={
-          <Link href={`/vehicles/${vehicle.id}/logs/new`} className={buttonPrimary}>
-            <PlusIcon />
-            Logger un travail
-          </Link>
-        }
-      >
-        {logs.length > 0 && (
-          <LogFiltersForm
-            filters={filters}
-            years={logYears(logs)}
-            rules={rules.map((r) => ({ id: r.id, name: r.name }))}
-            resetHref={`/vehicles/${vehicle.id}`}
-            shown={shownLogs.length}
-            total={logs.length}
-          />
-        )}
-        {shownLogs.length === 0 && logs.length > 0 && hasActiveFilters(filters) ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Aucun travail ne correspond aux filtres.
-          </p>
+        {tab === "rules" ? (
+          <RulesTable rules={rules} vehicleId={vehicle.id} unit={vehicle.odometerUnit} />
         ) : (
-          <LogsTable logs={shownLogs} unit={vehicle.odometerUnit} />
+          <>
+            {logs.length > 0 && (
+              <LogFiltersForm
+                filters={filters}
+                years={logYears(logs)}
+                rules={rules.map((r) => ({ id: r.id, name: r.name }))}
+                resetHref={vehicleTabHref(vehicle.id, "history")}
+                shown={shownLogs.length}
+                total={logs.length}
+              />
+            )}
+            {shownLogs.length === 0 && logs.length > 0 && hasActiveFilters(filters) ? (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Aucun travail ne correspond aux filtres.
+              </p>
+            ) : (
+              <LogsTable logs={shownLogs} unit={vehicle.odometerUnit} />
+            )}
+          </>
         )}
       </Card>
     </>
