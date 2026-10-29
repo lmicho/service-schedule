@@ -1,19 +1,6 @@
-import { count, desc, eq, sum } from "drizzle-orm";
+import { desc, eq, sum } from "drizzle-orm";
 import { db } from "./index";
 import { maintenanceLogs, vehicles, type MaintenanceLog } from "./schema";
-
-export function getDashboardStats() {
-  const vehicleCount = db.select({ n: count() }).from(vehicles).get()?.n ?? 0;
-  const totals = db
-    .select({ n: count(), cost: sum(maintenanceLogs.cost) })
-    .from(maintenanceLogs)
-    .get();
-  return {
-    vehicleCount,
-    logCount: totals?.n ?? 0,
-    totalCost: Number(totals?.cost ?? 0),
-  };
-}
 
 /** Total cost of logged jobs per vehicle (0 when none), biggest spender first. */
 export function listCostByVehicle(): { id: number; name: string; cost: number }[] {
