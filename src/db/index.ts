@@ -8,7 +8,16 @@ const dbPath = process.env.DATABASE_PATH ?? "data/service-schedule.db";
 mkdirSync(dirname(dbPath), { recursive: true });
 
 const sqlite = new Database(dbPath);
-sqlite.pragma("journal_mode = WAL");
+// Classic rollback journal, not WAL: a single-user local app gains nothing from
+// WAL, and its -wal/-shm side files were seen vanishing under a running dev
+// server, silently losing writes. Converting an existing WAL database needs
+// this to be the only connection, so if another one still has it open the
+// switch simply happens at the next start.
+try {
+  sqlite.pragma("journal_mode = DELETE");
+} catch {
+  // database busy: retried on the next start
+}
 sqlite.pragma("foreign_keys = ON");
 
 export const db = drizzle(sqlite, { schema });
