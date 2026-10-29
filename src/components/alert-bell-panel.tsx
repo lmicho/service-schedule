@@ -37,7 +37,7 @@ export function AlertBellPanel({ items }: { items: BellItem[] }) {
   const overdue = items.some((i) => i.status === "overdue");
 
   return (
-    <div ref={root} className="relative">
+    <div ref={root}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -58,13 +58,15 @@ export function AlertBellPanel({ items }: { items: BellItem[] }) {
       </button>
 
       {open && (
-        <div className="absolute top-full right-0 z-1000 mt-2 w-72 rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        // Anchored to the sidebar's top row (see app-shell), not to the button: the button
+        // sits at the sidebar's right edge, so a right-aligned panel ran off the screen.
+        <div className="absolute top-[calc(100%-1.5rem)] left-0 z-1000 w-80 max-w-[calc(100vw-2.5rem)] rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
           {items.length === 0 ? (
             <p className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
               Aucune alerte. Tout est à jour.
             </p>
           ) : (
-            <ul className="flex max-h-96 flex-col overflow-y-auto">
+            <ul className="flex max-h-[calc(100vh-8rem)] flex-col overflow-y-auto">
               {items.map((i) => (
                 <li
                   key={i.ruleId}

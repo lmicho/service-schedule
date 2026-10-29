@@ -45,7 +45,7 @@ export function AppShell({
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between gap-2 py-8">
+        <div className="relative flex items-center justify-between gap-2 py-8">
           <Logo />
           {/* Server-rendered slot: close the mobile drawer when a panel link is clicked */}
           <div
