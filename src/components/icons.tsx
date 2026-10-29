@@ -111,3 +111,11 @@ export function BellIcon({ className = "size-5" }: IconProps) {
     </svg>
   );
 }
+
+export function ChevronDownIcon({ className = "size-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}

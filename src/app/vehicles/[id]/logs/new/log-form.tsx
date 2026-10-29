@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState, useRef } from "react";
-import { Field, fieldClass as field } from "@/components/form-field";
+import { Field, Select, fieldClass as field } from "@/components/form-field";
 import { buttonPrimary, linkMuted } from "@/components/ui";
 import type { LogFormState } from "@/lib/log-form";
 
@@ -32,7 +32,7 @@ export function LogForm({
     <form action={action} className="flex flex-col gap-4">
       {rules.length > 0 && (
         <Field label="Règle d'entretien" error={errors.scheduleItemId}>
-          <select
+          <Select
             name="scheduleItemId"
             defaultValue={values.scheduleItemId ?? ""}
             onChange={(e) => {
@@ -41,7 +41,6 @@ export function LogForm({
                 titleRef.current.value = rule.name;
               }
             }}
-            className={field}
           >
             <option value="">Aucune (travail ponctuel)</option>
             {rules.map((r) => (
@@ -49,7 +48,7 @@ export function LogForm({
                 {r.name}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       )}
 
