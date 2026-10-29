@@ -3,14 +3,29 @@ import { db } from "./index";
 import { maintenanceLogs, vehicles, type MaintenanceLog } from "./schema";
 
 /** Total cost of logged jobs per vehicle (0 when none), biggest spender first. */
-export function listCostByVehicle(): { id: number; name: string; cost: number }[] {
+export function listCostByVehicle(): {
+  id: number;
+  name: string;
+  cost: number;
+  retired: boolean;
+}[] {
   return db
-    .select({ id: vehicles.id, name: vehicles.name, cost: sum(maintenanceLogs.cost) })
+    .select({
+      id: vehicles.id,
+      name: vehicles.name,
+      retiredAt: vehicles.retiredAt,
+      cost: sum(maintenanceLogs.cost),
+    })
     .from(vehicles)
     .leftJoin(maintenanceLogs, eq(maintenanceLogs.vehicleId, vehicles.id))
     .groupBy(vehicles.id)
     .all()
-    .map((row) => ({ id: row.id, name: row.name, cost: Number(row.cost ?? 0) }))
+    .map((row) => ({
+      id: row.id,
+      name: row.name,
+      cost: Number(row.cost ?? 0),
+      retired: row.retiredAt !== null,
+    }))
     .sort((a, b) => b.cost - a.cost || a.name.localeCompare(b.name));
 }
 

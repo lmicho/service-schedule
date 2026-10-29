@@ -11,11 +11,13 @@ export function ConfirmSubmitButton({
   message,
   className,
   confirmLabel = "Supprimer",
+  confirmClassName = buttonDangerSolid,
   children,
 }: {
   message: string;
   className?: string;
   confirmLabel?: string;
+  confirmClassName?: string;
   children: React.ReactNode;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -39,7 +41,7 @@ export function ConfirmSubmitButton({
           <button type="button" className={buttonOutline} onClick={() => dialog.current?.close()}>
             Annuler
           </button>
-          <button type="submit" className={buttonDangerSolid}>
+          <button type="submit" className={confirmClassName}>
             {confirmLabel}
           </button>
         </div>

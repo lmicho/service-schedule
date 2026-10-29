@@ -19,13 +19,15 @@ import {
   linkMuted,
 } from "@/components/ui";
 import { formatCurrency } from "@/lib/format";
-import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
+import { RETIRED_REASON_LABELS, VEHICLE_TYPE_LABELS } from "@/lib/labels";
 
 const LOGS_PER_VEHICLE = 5;
 
 async function Dashboard() {
   await connection(); // sync SQLite driver: keep the queries out of prerendering
-  const entries = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
+  const all = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
+  const entries = all.filter((e) => e.vehicle.retiredAt === null);
+  const retiredEntries = all.filter((e) => e.vehicle.retiredAt !== null);
   const costs = listCostByVehicle();
   const totalCost = costs.reduce((sum, v) => sum + v.cost, 0);
   const alerts = listActiveAlerts();
@@ -34,7 +36,7 @@ async function Dashboard() {
   return (
     <>
       <AlertBanner alerts={alerts} />
-      {entries.length > 0 && (
+      {costs.length > 0 && (
         <MetricCard
           icon={<CashIcon />}
           label="Dépenses totales"
@@ -46,6 +48,7 @@ async function Dashboard() {
                   <li key={v.id} className="flex items-center justify-between gap-3">
                     <Link href={`/vehicles/${v.id}`} className={`${linkMuted} truncate`}>
                       {v.name}
+                      {v.retired && " (retiré)"}
                     </Link>
                     <span className="whitespace-nowrap text-gray-800 dark:text-white/90">
                       {formatCurrency(v.cost)}
@@ -61,7 +64,9 @@ async function Dashboard() {
       {entries.length === 0 ? (
         <Card>
           <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-            Aucun véhicule pour l&apos;instant.
+            {retiredEntries.length > 0
+              ? "Aucun véhicule actif pour l'instant."
+              : "Aucun véhicule pour l'instant."}
           </p>
           <Link href="/vehicles/new" className={buttonPrimary}>
             <PlusIcon />
@@ -98,6 +103,25 @@ async function Dashboard() {
             </div>
           </Card>
         ))
+      )}
+
+      {retiredEntries.length > 0 && (
+        <Card title="Véhicules retirés">
+          <ul className="flex flex-col gap-2 text-sm">
+            {retiredEntries.map(({ vehicle, totalLogs }) => (
+              <li key={vehicle.id} className="flex flex-wrap items-center justify-between gap-2">
+                <Link href={`/vehicles/${vehicle.id}`} className="font-medium hover:text-brand-500">
+                  {vehicle.name}
+                </Link>
+                <span className="text-gray-500 dark:text-gray-400">
+                  {vehicle.retiredReason ? RETIRED_REASON_LABELS[vehicle.retiredReason] : "Retiré"}
+                  {" · "}
+                  {vehicle.retiredAt} · {totalLogs} travaux
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </>
   );

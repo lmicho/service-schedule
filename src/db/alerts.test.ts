@@ -88,6 +88,26 @@ describe("listActiveAlerts", () => {
   });
 });
 
+describe("retired vehicles", () => {
+  it("raise no alerts, and get them back when reactivated", () => {
+    const v = addVehicle("V-retired", 12_500); // overdue
+    rules.insertRule(v.id, ruleInput);
+    expect(alertsFor(v.id)).toHaveLength(1);
+
+    db.update(schema.vehicles)
+      .set({ retiredAt: "2026-05-01", retiredReason: "sold" })
+      .where(eq(schema.vehicles.id, v.id))
+      .run();
+    expect(alertsFor(v.id)).toHaveLength(0);
+
+    db.update(schema.vehicles)
+      .set({ retiredAt: null, retiredReason: null })
+      .where(eq(schema.vehicles.id, v.id))
+      .run();
+    expect(alertsFor(v.id)).toHaveLength(1);
+  });
+});
+
 describe("dismissAlert", () => {
   it("marks the alert dismissed for that cycle", () => {
     const v = addVehicle("V-dismiss", 12_500);

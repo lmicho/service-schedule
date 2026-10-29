@@ -2,6 +2,7 @@ import { count, eq } from "drizzle-orm";
 import { db } from "./index";
 import { maintenanceLogs, scheduleItems, vehicles } from "./schema";
 import { todayLocal } from "@/lib/date";
+import type { RetireFormInput } from "@/lib/retire-form";
 import type { VehicleFormInput } from "@/lib/vehicle-form";
 
 /** How much data deleting the vehicle would take with it. */
@@ -70,4 +71,28 @@ export function saveVehicle(
     .where(eq(vehicles.id, vehicleId))
     .run();
   return true;
+}
+
+/** Retires a vehicle: history is kept, alerts stop. False when it does not exist. */
+export function retireVehicle(vehicleId: number, data: RetireFormInput): boolean {
+  return (
+    db
+      .update(vehicles)
+      .set({ retiredAt: data.retiredAt, retiredReason: data.reason })
+      .where(eq(vehicles.id, vehicleId))
+      .returning({ id: vehicles.id })
+      .all().length > 0
+  );
+}
+
+/** Puts a retired vehicle back in service. False when it does not exist. */
+export function reactivateVehicle(vehicleId: number): boolean {
+  return (
+    db
+      .update(vehicles)
+      .set({ retiredAt: null, retiredReason: null })
+      .where(eq(vehicles.id, vehicleId))
+      .returning({ id: vehicles.id })
+      .all().length > 0
+  );
 }

@@ -72,9 +72,21 @@ export function MetricCard({
   );
 }
 
-export function Badge({ children }: { children: React.ReactNode }) {
+export function Badge({
+  children,
+  tone = "brand",
+}: {
+  children: React.ReactNode;
+  tone?: "brand" | "muted";
+}) {
+  const colors =
+    tone === "muted"
+      ? "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-gray-300"
+      : "bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400";
   return (
-    <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colors}`}
+    >
       {children}
     </span>
   );
