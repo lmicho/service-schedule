@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { getDashboardStats, listVehiclesWithRecentLogs } from "@/db/stats";
+import { getDashboardStats, listCostByVehicle, listVehiclesWithRecentLogs } from "@/db/stats";
 import { CarIcon, CashIcon, PlusIcon, ToolsIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
 import {
@@ -22,6 +22,7 @@ async function Dashboard() {
   await connection(); // sync SQLite driver: keep the queries out of prerendering
   const stats = getDashboardStats();
   const entries = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
+  const costs = listCostByVehicle();
 
   return (
     <>
@@ -36,6 +37,22 @@ async function Dashboard() {
           icon={<CashIcon />}
           label="Dépenses totales"
           value={formatCurrency(stats.totalCost)}
+          detail={
+            costs.length > 1 && (
+              <ul className="flex flex-col justify-end gap-1.5 border-t border-gray-100 pt-4 text-sm sm:min-w-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 dark:border-gray-800">
+                {costs.map((v) => (
+                  <li key={v.id} className="flex items-center justify-between gap-3">
+                    <Link href={`/vehicles/${v.id}`} className={`${linkMuted} truncate`}>
+                      {v.name}
+                    </Link>
+                    <span className="whitespace-nowrap text-gray-800 dark:text-white/90">
+                      {formatCurrency(v.cost)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )
+          }
         />
       </div>
 
