@@ -1,6 +1,8 @@
+import Link from "next/link";
+import { PencilIcon } from "./icons";
 import type { MaintenanceLog } from "@/db/schema";
 import { formatCurrency, formatDistance } from "@/lib/format";
-import { tableWrap, td, th, tr } from "./ui";
+import { linkMuted, tableWrap, td, th, tr } from "./ui";
 
 export function LogsTable({ logs, unit }: { logs: MaintenanceLog[]; unit: string }) {
   if (logs.length === 0) {
@@ -17,6 +19,7 @@ export function LogsTable({ logs, unit }: { logs: MaintenanceLog[]; unit: string
             <th className={th}>Odomètre</th>
             <th className={th}>Coût</th>
             <th className={th}>Garage</th>
+            <th className={th}></th>
           </tr>
         </thead>
         <tbody>
@@ -33,11 +36,23 @@ export function LogsTable({ logs, unit }: { logs: MaintenanceLog[]; unit: string
               <td className={`${td} whitespace-nowrap text-gray-500 dark:text-gray-400`}>
                 {log.performedAt}
               </td>
-              <td className={`${td} whitespace-nowrap`}>{formatDistance(log.odometer, unit)}</td>
+              <td className={`${td} whitespace-nowrap`}>
+                {log.odometer !== null ? formatDistance(log.odometer, unit) : "—"}
+              </td>
               <td className={`${td} whitespace-nowrap`}>
                 {log.cost != null ? formatCurrency(log.cost) : "—"}
               </td>
               <td className={`${td} text-gray-500 dark:text-gray-400`}>{log.shop ?? "—"}</td>
+              <td className={`${td} whitespace-nowrap`}>
+                <Link
+                  href={`/vehicles/${log.vehicleId}/logs/${log.id}/edit`}
+                  className={linkMuted}
+                  aria-label="Modifier"
+                  title="Modifier"
+                >
+                  <PencilIcon />
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { RuleWithStatus } from "@/db/rules";
 import { describeDue, describeInterval } from "@/lib/format";
+import { PencilIcon } from "./icons";
 import { StatusBadge, linkMuted, tableWrap, td, th, tr } from "./ui";
 
 export function RulesTable({
@@ -55,8 +56,13 @@ export function RulesTable({
                   >
                     Logger
                   </Link>
-                  <Link href={`/vehicles/${vehicleId}/rules/${rule.id}/edit`} className={linkMuted}>
-                    Modifier
+                  <Link
+                    href={`/vehicles/${vehicleId}/rules/${rule.id}/edit`}
+                    className={linkMuted}
+                    aria-label="Modifier"
+                    title="Modifier"
+                  >
+                    <PencilIcon />
                   </Link>
                 </div>
               </td>

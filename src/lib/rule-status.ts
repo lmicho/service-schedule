@@ -3,7 +3,8 @@ import { computeDue, type DueResult } from "./due";
 
 /**
  * Status of a rule: counted from the last job logged against it, or from the
- * rule's baseline while nothing has been logged yet.
+ * rule's baseline while nothing has been logged yet. If that last job has no
+ * odometer reading, only the time interval can be tracked for this cycle.
  */
 export function computeRuleStatus(
   rule: ScheduleItem,
@@ -12,7 +13,9 @@ export function computeRuleStatus(
   today: string,
 ): DueResult {
   const from = lastLog
-    ? { odometer: lastLog.odometer, date: lastLog.performedAt }
+    ? { odometer: lastLog.odometer ?? 0, date: lastLog.performedAt }
     : { odometer: rule.baselineOdometer, date: rule.baselineDate ?? today };
-  return computeDue(rule, from, { odometer: vehicle.odometer, date: today });
+  const trackable =
+    lastLog?.odometer === null ? { ...rule, intervalDistance: null, warnDistance: null } : rule;
+  return computeDue(trackable, from, { odometer: vehicle.odometer, date: today });
 }

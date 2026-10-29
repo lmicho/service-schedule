@@ -14,12 +14,14 @@ export function LogForm({
   rules,
   unit,
   cancelHref,
+  submitLabel = "Enregistrer le travail",
 }: {
   action: LogFormAction;
   defaults: Record<string, string>;
   rules: { id: number; name: string }[];
   unit: string;
   cancelHref: string;
+  submitLabel?: string;
 }) {
   const [state, action, pending] = useActionState(submit, {});
   const { errors = {} } = state;
@@ -73,11 +75,10 @@ export function LogForm({
             className={field}
           />
         </Field>
-        <Field label={`Odomètre (${unit}) *`} error={errors.odometer}>
+        <Field label={`Odomètre (${unit})`} error={errors.odometer}>
           <input
             name="odometer"
             inputMode="numeric"
-            required
             defaultValue={values.odometer}
             className={field}
           />
@@ -99,7 +100,7 @@ export function LogForm({
 
       <div className="flex items-center gap-3">
         <button type="submit" disabled={pending} className={buttonPrimary}>
-          {pending ? "Enregistrement…" : "Enregistrer le travail"}
+          {pending ? "Enregistrement…" : submitLabel}
         </button>
         <Link href={cancelHref} className={linkMuted}>
           Annuler

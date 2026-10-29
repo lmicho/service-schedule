@@ -93,3 +93,12 @@ export function MoonIcon({ className = "size-5" }: IconProps) {
     </svg>
   );
 }
+
+export function PencilIcon({ className = "size-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 013 3L8 19l-4 1z" />
+      <path d="M14.5 6.5l3 3" />
+    </svg>
+  );
+}
