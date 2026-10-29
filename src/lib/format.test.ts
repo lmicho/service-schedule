@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { describeDue, describeEstimate, describeInterval, describeRemaining } from "./format";
+import {
+  describeDue,
+  describeEstimate,
+  describeInterval,
+  describeRemaining,
+  describeWarning,
+} from "./format";
 
 const base = {
   status: "ok" as const,
@@ -64,6 +70,21 @@ describe("describeEstimate", () => {
     );
     expect(describeEstimate({ days: 125, date: "2027-03-02" })).toBe(
       "≈ dans 4 mois (vers le 2027-03-02)",
+    );
+  });
+});
+
+describe("describeWarning", () => {
+  it("lists the warnings the rule sets", () => {
+    expect(describeWarning({ warnDistance: 600, warnMonths: 1 }, "km")).toMatch(
+      /^600 km avant · 1 mois avant$/,
+    );
+    expect(describeWarning({ warnDistance: null, warnMonths: 2 }, "km")).toBe("2 mois avant");
+  });
+
+  it("falls back to the default when none is set", () => {
+    expect(describeWarning({ warnDistance: null, warnMonths: null }, "km")).toBe(
+      "10 % de l'intervalle (par défaut)",
     );
   });
 });
