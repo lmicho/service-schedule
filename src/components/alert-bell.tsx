@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { listActiveAlerts } from "@/db/alerts";
-import { describeRemaining } from "@/lib/format";
+import { describeEstimate, describeRemaining } from "@/lib/format";
 import { AlertBellPanel } from "./alert-bell-panel";
 
 export async function AlertBell() {
@@ -12,6 +12,7 @@ export async function AlertBell() {
     vehicleName: vehicle.name,
     status: rule.due.status === "overdue" ? ("overdue" as const) : ("soon" as const),
     remaining: describeRemaining(rule.due, vehicle.odometerUnit),
+    estimate: rule.estimate ? describeEstimate(rule.estimate) : null,
   }));
 
   return <AlertBellPanel items={items} />;

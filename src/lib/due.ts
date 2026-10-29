@@ -36,7 +36,7 @@ function toUtcDay(date: string): number {
   return Date.parse(`${date}T00:00:00Z`);
 }
 
-function addDays(date: string, days: number): string {
+export function addDays(date: string, days: number): string {
   return new Date(toUtcDay(date) + days * MS_PER_DAY).toISOString().slice(0, 10);
 }
 
@@ -89,4 +89,25 @@ export function computeDue(rule: DueRule, from: DuePoint, current: DuePoint): Du
   }
 
   return { status, nextDueOdometer, nextDueDate, remainingDistance, remainingDays };
+}
+
+export interface DueEstimate {
+  days: number;
+  date: string; // YYYY-MM-DD
+}
+
+/**
+ * When a distance deadline will probably be reached, at `ratePerDay` km (or mi)
+ * per day. Null when there is nothing to estimate: no distance interval, the
+ * deadline is already passed, or the pace is unknown.
+ */
+export function estimateDistanceDue(
+  due: Pick<DueResult, "remainingDistance">,
+  ratePerDay: number | null,
+  today: string,
+): DueEstimate | null {
+  if (due.remainingDistance === null || due.remainingDistance <= 0) return null;
+  if (ratePerDay === null || ratePerDay <= 0) return null;
+  const days = Math.ceil(due.remainingDistance / ratePerDay);
+  return { days, date: addDays(today, days) };
 }

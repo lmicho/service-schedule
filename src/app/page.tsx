@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { listActiveAlerts } from "@/db/alerts";
+import { OdometerQuickEdit } from "@/components/odometer-quick-edit";
+import { updateOdometer } from "@/app/vehicles/actions";
+import { isStale, todayLocal } from "@/lib/date";
 import { AlertBanner } from "@/components/alert-banner";
 import { getDashboardStats, listCostByVehicle, listVehiclesWithRecentLogs } from "@/db/stats";
 import { CarIcon, CashIcon, PlusIcon, ToolsIcon } from "@/components/icons";
@@ -15,7 +18,7 @@ import {
   buttonPrimary,
   linkMuted,
 } from "@/components/ui";
-import { formatCurrency, formatDistance } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 
 const LOGS_PER_VEHICLE = 5;
@@ -26,6 +29,7 @@ async function Dashboard() {
   const entries = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
   const costs = listCostByVehicle();
   const alerts = listActiveAlerts();
+  const today = todayLocal();
 
   return (
     <>
@@ -84,7 +88,13 @@ async function Dashboard() {
           >
             <div className="-mt-2 mb-4 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
               <Badge>{VEHICLE_TYPE_LABELS[vehicle.type]}</Badge>
-              {formatDistance(vehicle.odometer, vehicle.odometerUnit)}
+              <OdometerQuickEdit
+                action={updateOdometer.bind(null, vehicle.id)}
+                odometer={vehicle.odometer}
+                unit={vehicle.odometerUnit}
+                updatedAt={vehicle.odometerUpdatedAt}
+                stale={isStale(vehicle.odometerUpdatedAt, today)}
+              />
             </div>
             <LogsTable logs={logs} unit={vehicle.odometerUnit} />
             <div className="mt-4">

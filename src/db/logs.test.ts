@@ -48,6 +48,17 @@ describe("insertLog", () => {
     expect(after?.odometer).toBe(10_000);
   });
 
+  it("dates the raised odometer with the job's date", () => {
+    const v = addVehicle(5_000);
+    mod.insertLog(v.id, { ...input, performedAt: "2026-03-01" });
+    const after = db
+      .select()
+      .from(schema.vehicles)
+      .all()
+      .find((x) => x.id === v.id);
+    expect(after?.odometerUpdatedAt).toBe("2026-03-01");
+  });
+
   it("leaves the vehicle odometer alone when the job has no reading", () => {
     const v = addVehicle(50_000);
     const log = mod.insertLog(v.id, { ...input, odometer: null });

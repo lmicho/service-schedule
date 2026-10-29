@@ -16,6 +16,8 @@ export const vehicles = sqliteTable("vehicles", {
   vin: text("vin"),
   odometer: integer("odometer").notNull().default(0),
   odometerUnit: text("odometer_unit", { enum: ODOMETER_UNITS }).notNull().default("km"),
+  // When the odometer value was last set (YYYY-MM-DD); null = unknown.
+  odometerUpdatedAt: text("odometer_updated_at"),
   createdAt: text("created_at")
     .notNull()
     .default(sql`(date('now'))`),

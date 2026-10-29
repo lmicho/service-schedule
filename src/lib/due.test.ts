@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeDue } from "./due";
+import { computeDue, estimateDistanceDue } from "./due";
 
 const from = { odometer: 10_000, date: "2026-01-01" };
 
@@ -75,5 +75,23 @@ describe("computeDue", () => {
     expect(
       computeDue({ intervalMonths: 12 }, { odometer: 0, date: "2026-11-15" }, now).nextDueDate,
     ).toBe("2027-11-15");
+  });
+});
+
+describe("estimateDistanceDue", () => {
+  it("projects the deadline from the pace, rounding days up", () => {
+    // 1 000 km left at 30 km/day = 33.3 days
+    expect(estimateDistanceDue({ remainingDistance: 1000 }, 30, "2026-01-01")).toEqual({
+      days: 34,
+      date: "2026-02-04",
+    });
+  });
+
+  it("has no estimate without a pace, past the deadline, or without a distance interval", () => {
+    expect(estimateDistanceDue({ remainingDistance: 1000 }, null, "2026-01-01")).toBeNull();
+    expect(estimateDistanceDue({ remainingDistance: 1000 }, 0, "2026-01-01")).toBeNull();
+    expect(estimateDistanceDue({ remainingDistance: -5 }, 30, "2026-01-01")).toBeNull();
+    expect(estimateDistanceDue({ remainingDistance: 0 }, 30, "2026-01-01")).toBeNull();
+    expect(estimateDistanceDue({ remainingDistance: null }, 30, "2026-01-01")).toBeNull();
   });
 });

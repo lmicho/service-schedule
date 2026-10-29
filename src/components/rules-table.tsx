@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { RuleWithStatus } from "@/db/rules";
-import { describeDue, describeInterval } from "@/lib/format";
+import { describeDue, describeEstimate, describeInterval } from "@/lib/format";
 import { PencilIcon } from "./icons";
 import { StatusBadge, linkMuted, tableWrap, td, th, tr } from "./ui";
 
@@ -44,6 +44,11 @@ export function RulesTable({
                 {describeDue(rule.due, unit).map((line) => (
                   <div key={line}>{line}</div>
                 ))}
+                {rule.estimate && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {describeEstimate(rule.estimate)}
+                  </div>
+                )}
               </td>
               <td className={td}>
                 <StatusBadge status={rule.due.status} />

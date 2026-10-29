@@ -11,7 +11,9 @@ import { PlusIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
 import { RulesTable } from "@/components/rules-table";
 import { Badge, Card, PageTitle, buttonOutline, buttonPrimary, linkMuted } from "@/components/ui";
-import { formatDistance } from "@/lib/format";
+import { OdometerQuickEdit } from "@/components/odometer-quick-edit";
+import { isStale, todayLocal } from "@/lib/date";
+import { updateOdometer } from "../actions";
 import { VEHICLE_TYPE_LABELS } from "@/lib/labels";
 
 async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
@@ -48,7 +50,13 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
           <div>
             <dt className="text-gray-500 dark:text-gray-400">Odomètre</dt>
             <dd className="mt-1 font-medium">
-              {formatDistance(vehicle.odometer, vehicle.odometerUnit)}
+              <OdometerQuickEdit
+                action={updateOdometer.bind(null, vehicle.id)}
+                odometer={vehicle.odometer}
+                unit={vehicle.odometerUnit}
+                updatedAt={vehicle.odometerUpdatedAt}
+                stale={isStale(vehicle.odometerUpdatedAt, todayLocal())}
+              />
             </dd>
           </div>
           {vehicle.vin && (

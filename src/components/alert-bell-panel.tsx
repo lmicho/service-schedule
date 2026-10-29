@@ -11,6 +11,7 @@ export type BellItem = {
   vehicleName: string;
   status: "soon" | "overdue";
   remaining: string;
+  estimate: string | null;
 };
 
 export function AlertBellPanel({ items }: { items: BellItem[] }) {
@@ -86,6 +87,9 @@ export function AlertBellPanel({ items }: { items: BellItem[] }) {
                       >
                         {i.remaining}
                       </p>
+                      {i.estimate && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{i.estimate}</p>
+                      )}
                     </div>
                     <Link
                       href={`/vehicles/${i.vehicleId}/logs/new?rule=${i.ruleId}`}

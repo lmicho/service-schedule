@@ -22,7 +22,7 @@ export function insertLog(vehicleId: number, data: LogFormInput): MaintenanceLog
       .returning()
       .get();
 
-    bumpOdometer(tx, vehicle, data.odometer);
+    bumpOdometer(tx, vehicle, data.odometer, data.performedAt);
     return log;
   });
 }
@@ -50,7 +50,7 @@ export function updateLog(
       .get();
     if (!log) return null;
 
-    bumpOdometer(tx, vehicle, data.odometer);
+    bumpOdometer(tx, vehicle, data.odometer, data.performedAt);
     return log;
   });
 }
@@ -90,9 +90,17 @@ function assertRuleBelongsTo(tx: Tx, vehicleId: number, scheduleItemId: number |
   if (rule?.vehicleId !== vehicleId) throw new Error("Rule does not belong to this vehicle");
 }
 
-function bumpOdometer(tx: Tx, vehicle: { id: number; odometer: number }, odometer: number | null) {
+function bumpOdometer(
+  tx: Tx,
+  vehicle: { id: number; odometer: number },
+  odometer: number | null,
+  performedAt: string,
+) {
   if (odometer !== null && odometer > vehicle.odometer) {
-    tx.update(vehicles).set({ odometer }).where(eq(vehicles.id, vehicle.id)).run();
+    tx.update(vehicles)
+      .set({ odometer, odometerUpdatedAt: performedAt })
+      .where(eq(vehicles.id, vehicle.id))
+      .run();
   }
 }
 

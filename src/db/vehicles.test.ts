@@ -34,6 +34,52 @@ function addLog(vehicleId: number, scheduleItemId: number | null = null) {
     .run();
 }
 
+const vehicleInput = {
+  name: "Saved",
+  type: "car" as const,
+  make: null,
+  model: null,
+  year: null,
+  vin: null,
+  odometer: 1000,
+  odometerUnit: "km" as const,
+};
+
+function readVehicle(id: number) {
+  return db
+    .select()
+    .from(schema.vehicles)
+    .all()
+    .find((v) => v.id === id)!;
+}
+
+describe("updateVehicleOdometer", () => {
+  it("sets the odometer and its date, and reports unknown vehicles", () => {
+    const v = addVehicle("Quick");
+    expect(mod.updateVehicleOdometer(v.id, 5000, "2026-03-04")).toBe(true);
+    expect(readVehicle(v.id)).toMatchObject({ odometer: 5000, odometerUpdatedAt: "2026-03-04" });
+    expect(mod.updateVehicleOdometer(9999, 1, "2026-03-04")).toBe(false);
+  });
+});
+
+describe("saveVehicle", () => {
+  it("moves the odometer date only when the odometer changed", () => {
+    const v = db
+      .insert(schema.vehicles)
+      .values({ name: "S", type: "car", odometer: 1000, odometerUpdatedAt: "2025-01-01" })
+      .returning()
+      .get();
+
+    expect(mod.saveVehicle(v.id, { ...vehicleInput, name: "Renamed" }, "2026-06-01")).toBe(true);
+    expect(readVehicle(v.id)).toMatchObject({ name: "Renamed", odometerUpdatedAt: "2025-01-01" });
+
+    mod.saveVehicle(v.id, { ...vehicleInput, odometer: 1500 }, "2026-06-01");
+    expect(readVehicle(v.id)).toMatchObject({ odometer: 1500, odometerUpdatedAt: "2026-06-01" });
+
+    expect(mod.saveVehicle(9999, vehicleInput)).toBe(false);
+  });
+});
+
 describe("deleteVehicle", () => {
   it("removes the vehicle with its logs, rules and dismissals, and nothing else", () => {
     const gone = addVehicle("Gone");
