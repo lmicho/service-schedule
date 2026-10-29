@@ -90,8 +90,8 @@ async function VehicleDetails({ params }: { params: Promise<{ id: string }> }) {
 export default function VehiclePage(props: PageProps<"/vehicles/[id]">) {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <Link href="/vehicles" className={linkMuted}>
-        ← Véhicules
+      <Link href="/" className={linkMuted}>
+        ← Tableau de bord
       </Link>
       <Suspense fallback={<p className="text-sm text-gray-500">Chargement…</p>}>
         <VehicleDetails params={props.params} />
