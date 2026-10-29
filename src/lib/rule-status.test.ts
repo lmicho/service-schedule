@@ -37,4 +37,16 @@ describe("computeRuleStatus", () => {
     const r = computeRuleStatus(timed, null, { odometer: 0 }, "2026-05-01");
     expect(r).toMatchObject({ status: "ok", nextDueDate: "2026-05-31" });
   });
+
+  it("only tracks time when the last job has no odometer reading", () => {
+    const both = { ...rule, intervalDays: 180 };
+    const last = { odometer: null, performedAt: "2026-02-01" };
+    const r = computeRuleStatus(both, last, { odometer: 99_999 }, "2026-02-10");
+    expect(r).toMatchObject({
+      status: "ok",
+      nextDueOdometer: null,
+      remainingDistance: null,
+      nextDueDate: "2026-07-31",
+    });
+  });
 });

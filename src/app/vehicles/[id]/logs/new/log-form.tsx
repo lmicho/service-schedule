@@ -73,11 +73,10 @@ export function LogForm({
             className={field}
           />
         </Field>
-        <Field label={`Odomètre (${unit}) *`} error={errors.odometer}>
+        <Field label={`Odomètre (${unit})`} error={errors.odometer}>
           <input
             name="odometer"
             inputMode="numeric"
-            required
             defaultValue={values.odometer}
             className={field}
           />

@@ -5,7 +5,8 @@ import type { LogFormInput } from "@/lib/log-form";
 
 /**
  * Records a job on a vehicle. If the log's odometer is higher than the
- * vehicle's, the vehicle's odometer is bumped to match. Returns null when the
+ * vehicle's, the vehicle's odometer is bumped to match (a job without an
+ * odometer reading leaves it alone). Returns null when the
  * vehicle does not exist; throws if the linked rule belongs to another vehicle.
  */
 export function insertLog(vehicleId: number, data: LogFormInput): MaintenanceLog | null {
@@ -28,7 +29,7 @@ export function insertLog(vehicleId: number, data: LogFormInput): MaintenanceLog
       .returning()
       .get();
 
-    if (data.odometer > vehicle.odometer) {
+    if (data.odometer !== null && data.odometer > vehicle.odometer) {
       tx.update(vehicles).set({ odometer: data.odometer }).where(eq(vehicles.id, vehicleId)).run();
     }
     return log;

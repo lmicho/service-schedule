@@ -22,12 +22,21 @@ const optionalCost = z.preprocess(
 export const logFormSchema = z.object({
   title: z.string().trim().min(1, "Le titre est requis").max(120),
   performedAt: pastOrTodayDate,
-  odometer: z
-    .string()
-    .trim()
-    .min(1, "L'odomètre est requis")
-    .transform(Number)
-    .pipe(z.number().int("Entier requis").min(0, "Doit être positif")),
+  // Optional: old jobs often have no recorded reading.
+  odometer: z.preprocess(
+    (v) => v ?? "",
+    z
+      .string()
+      .trim()
+      .transform((v) => (v === "" ? null : Number(v)))
+      .pipe(
+        z
+          .number({ error: "Nombre invalide" })
+          .int("Entier requis")
+          .min(0, "Doit être positif")
+          .nullable(),
+      ),
+  ),
   cost: optionalCost,
   scheduleItemId: z.preprocess(
     (v) => v ?? "",

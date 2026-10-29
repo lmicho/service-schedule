@@ -50,7 +50,7 @@ export const maintenanceLogs = sqliteTable("maintenance_logs", {
   }),
   title: text("title").notNull(),
   performedAt: text("performed_at").notNull(), // YYYY-MM-DD
-  odometer: integer("odometer").notNull(),
+  odometer: integer("odometer"), // unknown for some old jobs
   cost: real("cost"),
   shop: text("shop"),
   notes: text("notes"),

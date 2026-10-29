@@ -33,7 +33,9 @@ export function LogsTable({ logs, unit }: { logs: MaintenanceLog[]; unit: string
               <td className={`${td} whitespace-nowrap text-gray-500 dark:text-gray-400`}>
                 {log.performedAt}
               </td>
-              <td className={`${td} whitespace-nowrap`}>{formatDistance(log.odometer, unit)}</td>
+              <td className={`${td} whitespace-nowrap`}>
+                {log.odometer !== null ? formatDistance(log.odometer, unit) : "—"}
+              </td>
               <td className={`${td} whitespace-nowrap`}>
                 {log.cost != null ? formatCurrency(log.cost) : "—"}
               </td>

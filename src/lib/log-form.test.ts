@@ -25,6 +25,14 @@ describe("parseLogForm", () => {
     });
   });
 
+  it("accepts a log without an odometer reading", () => {
+    const noOdometer = { title: valid.title, performedAt: valid.performedAt };
+    expect(parseLogForm(form(noOdometer))).toMatchObject({ data: { odometer: null } });
+    expect(parseLogForm(form({ ...valid, odometer: "" }))).toMatchObject({
+      data: { odometer: null },
+    });
+  });
+
   it("accepts a decimal comma in the cost", () => {
     expect(parseLogForm(form({ ...valid, cost: "45,50" }))).toMatchObject({
       data: { cost: 45.5 },

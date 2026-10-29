@@ -48,6 +48,18 @@ describe("insertLog", () => {
     expect(after?.odometer).toBe(10_000);
   });
 
+  it("leaves the vehicle odometer alone when the job has no reading", () => {
+    const v = addVehicle(50_000);
+    const log = mod.insertLog(v.id, { ...input, odometer: null });
+    expect(log?.odometer).toBeNull();
+    const after = db
+      .select()
+      .from(schema.vehicles)
+      .all()
+      .find((x) => x.id === v.id);
+    expect(after?.odometer).toBe(50_000);
+  });
+
   it("keeps the vehicle odometer when logging an older, lower reading", () => {
     const v = addVehicle(50_000);
     mod.insertLog(v.id, input);
