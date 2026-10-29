@@ -1,4 +1,4 @@
-import type { DueEstimate, DueResult } from "./due";
+import type { DueEstimate, DueResult, Threshold } from "./due";
 
 export function formatDistance(value: number, unit: string): string {
   return `${value.toLocaleString("fr-CA")} ${unit}`;
@@ -12,19 +12,48 @@ function remaining(value: number, unit: string): string {
   return value < 0 ? `en retard de ${-value} ${unit}` : `dans ${value} ${unit}`;
 }
 
-/** Human-readable next-due lines, one per interval type the rule uses. */
-export function describeDue(due: DueResult, unit: string): string[] {
-  const lines: string[] = [];
+/** Next-due line for each interval the rule uses (null when it has no such interval). */
+export function describeDueParts(
+  due: DueResult,
+  unit: string,
+): { distance: string | null; time: string | null } {
+  let distance: string | null = null;
   if (due.nextDueOdometer !== null && due.remainingDistance !== null) {
     const left = remaining(due.remainingDistance, unit).replace(/\d+/, (n) =>
       Number(n).toLocaleString("fr-CA"),
     );
-    lines.push(`à ${formatDistance(due.nextDueOdometer, unit)} (${left})`);
+    distance = `à ${formatDistance(due.nextDueOdometer, unit)} (${left})`;
   }
-  if (due.nextDueDate !== null && due.remainingDays !== null) {
-    lines.push(`le ${due.nextDueDate} (${remaining(due.remainingDays, "j")})`);
+  const time =
+    due.nextDueDate !== null && due.remainingDays !== null
+      ? `le ${due.nextDueDate} (${remaining(due.remainingDays, "j")})`
+      : null;
+  return { distance, time };
+}
+
+/**
+ * Which next-due lines to show. Once a limit is reached, that limit is the
+ * message: showing the other one ("dans 2 804 km" next to "en retard de 139 j")
+ * only muddies it. Before that, both are shown, as alternatives ("ou").
+ */
+export function dueLinesToShow(
+  due: Pick<DueResult, "status" | "remainingDistance" | "remainingDays">,
+  leading: Threshold | null,
+): { distance: boolean; time: boolean; or: boolean } {
+  const hasDistance = due.remainingDistance !== null;
+  const hasTime = due.remainingDays !== null;
+  const reached = due.status === "overdue";
+
+  if (reached && leading !== null) {
+    return { distance: leading === "distance", time: leading === "time", or: false };
   }
-  return lines;
+  return { distance: hasDistance, time: hasTime, or: hasDistance && hasTime && !reached };
+}
+
+/** Human-readable next-due lines, one per interval type the rule uses. */
+export function describeDue(due: DueResult, unit: string): string[] {
+  const { distance, time } = describeDueParts(due, unit);
+  return [distance, time].filter((line): line is string => line !== null);
 }
 
 /** "≈ dans 18 j (vers le 2026-11-15)" / "≈ dans 4 mois (vers le …)" */
@@ -34,17 +63,22 @@ export function describeEstimate(estimate: DueEstimate): string {
   return `≈ dans ${wait} (vers le ${estimate.date})`;
 }
 
-/** "en retard de 300 km · dans 12 j": what is left on each interval the rule uses. */
-export function describeRemaining(due: DueResult, unit: string): string {
+/**
+ * "en retard de 300 km · dans 12 j": what is left on each interval the rule uses,
+ * or only on `only` when one interval is the one that comes first.
+ */
+export function describeRemaining(due: DueResult, unit: string, only?: Threshold | null): string {
   const parts: string[] = [];
-  if (due.remainingDistance !== null) {
+  if (due.remainingDistance !== null && only !== "time") {
     parts.push(
       remaining(due.remainingDistance, unit).replace(/\d+/, (n) =>
         Number(n).toLocaleString("fr-CA"),
       ),
     );
   }
-  if (due.remainingDays !== null) parts.push(remaining(due.remainingDays, "j"));
+  if (due.remainingDays !== null && only !== "distance") {
+    parts.push(remaining(due.remainingDays, "j"));
+  }
   return parts.join(" · ");
 }
 

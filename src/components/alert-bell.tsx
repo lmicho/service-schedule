@@ -11,8 +11,9 @@ export async function AlertBell() {
     vehicleId: vehicle.id,
     vehicleName: vehicle.name,
     status: rule.due.status === "overdue" ? ("overdue" as const) : ("soon" as const),
-    remaining: describeRemaining(rule.due, vehicle.odometerUnit),
-    estimate: rule.estimate ? describeEstimate(rule.estimate) : null,
+    remaining: describeRemaining(rule.due, vehicle.odometerUnit, rule.leading),
+    // The estimate is for the distance limit: pointless when the time limit comes first.
+    estimate: rule.estimate && rule.leading !== "time" ? describeEstimate(rule.estimate) : null,
   }));
 
   return <AlertBellPanel items={items} />;

@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
   describeDue,
+  describeDueParts,
   describeEstimate,
   describeInterval,
   describeRemaining,
   describeWarning,
+  dueLinesToShow,
 } from "./format";
 
 const base = {
   status: "ok" as const,
+  distanceStatus: null,
+  timeStatus: null,
   nextDueOdometer: null,
   nextDueDate: null,
   remainingDistance: null,
@@ -61,6 +65,13 @@ describe("describeRemaining", () => {
   it("handles a single interval", () => {
     expect(describeRemaining({ ...base, remainingDays: 5 }, "km")).toBe("dans 5 j");
   });
+
+  it("shows only the interval that comes first when told", () => {
+    const due = { ...base, remainingDistance: 2800, remainingDays: -139 };
+    expect(describeRemaining(due, "km", "time")).toBe("en retard de 139 j");
+    expect(describeRemaining(due, "km", "distance")).toMatch(/^dans 2.800 km$/);
+    expect(describeRemaining(due, "km", null)).toMatch(/dans 2.800 km · en retard de 139 j/);
+  });
 });
 
 describe("describeEstimate", () => {
@@ -86,5 +97,66 @@ describe("describeWarning", () => {
     expect(describeWarning({ warnDistance: null, warnMonths: null }, "km")).toBe(
       "10 % de l'intervalle (par défaut)",
     );
+  });
+});
+
+describe("describeDueParts", () => {
+  it("separates the distance and the date, with null for a missing interval", () => {
+    const both = describeDueParts(
+      {
+        ...base,
+        nextDueOdometer: 12_000,
+        remainingDistance: 500,
+        nextDueDate: "2026-12-01",
+        remainingDays: 34,
+      },
+      "km",
+    );
+    expect(both.distance).toMatch(/^à 12.000 km \(dans 500 km\)$/);
+    expect(both.time).toBe("le 2026-12-01 (dans 34 j)");
+    expect(describeDueParts(base, "km")).toEqual({ distance: null, time: null });
+  });
+});
+
+describe("dueLinesToShow", () => {
+  const both = { remainingDistance: 2800, remainingDays: -139 };
+
+  it("shows both limits, as alternatives, while neither is reached", () => {
+    expect(dueLinesToShow({ ...both, status: "ok", remainingDays: 200 }, null)).toEqual({
+      distance: true,
+      time: true,
+      or: true,
+    });
+    expect(dueLinesToShow({ ...both, status: "soon", remainingDays: 20 }, "time")).toEqual({
+      distance: true,
+      time: true,
+      or: true,
+    });
+  });
+
+  it("shows only the limit that is reached", () => {
+    expect(dueLinesToShow({ ...both, status: "overdue" }, "time")).toEqual({
+      distance: false,
+      time: true,
+      or: false,
+    });
+    expect(
+      dueLinesToShow({ remainingDistance: -300, remainingDays: 50, status: "overdue" }, "distance"),
+    ).toEqual({ distance: true, time: false, or: false });
+  });
+
+  it('shows both, without "ou", when both are reached and cannot be ranked', () => {
+    expect(
+      dueLinesToShow({ remainingDistance: -300, remainingDays: -20, status: "overdue" }, null),
+    ).toEqual({ distance: true, time: true, or: false });
+  });
+
+  it("shows the single line of a one-interval rule", () => {
+    expect(
+      dueLinesToShow({ remainingDistance: 500, remainingDays: null, status: "ok" }, "distance"),
+    ).toEqual({ distance: true, time: false, or: false });
+    expect(
+      dueLinesToShow({ remainingDistance: null, remainingDays: -3, status: "overdue" }, "time"),
+    ).toEqual({ distance: false, time: true, or: false });
   });
 });

@@ -88,6 +88,29 @@ describe("listActiveAlerts", () => {
   });
 });
 
+describe("rules with both a distance and a time interval", () => {
+  it("alerts on whichever limit is reached first, and says which one", () => {
+    const v = addVehicle("V-both", 10_100); // 100 km into a 5 000 km interval
+    rules.insertRule(v.id, {
+      ...ruleInput,
+      name: "Les deux",
+      intervalDistance: 5000,
+      warnDistance: null,
+      intervalMonths: 6,
+      baselineOdometer: 10_000,
+      baselineDate: "2025-01-01", // the 6 months ended long before TODAY
+    });
+
+    const [alert] = alertsFor(v.id);
+    expect(alert.rule.due).toMatchObject({
+      status: "overdue",
+      distanceStatus: "ok",
+      timeStatus: "overdue",
+    });
+    expect(alert.rule.leading).toBe("time");
+  });
+});
+
 describe("retired vehicles", () => {
   it("raise no alerts, and get them back when reactivated", () => {
     const v = addVehicle("V-retired", 12_500); // overdue

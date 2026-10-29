@@ -32,8 +32,10 @@ export function AlertBanner({ alerts }: { alerts: Alert[] }) {
             <span className="font-medium">
               {vehicle.name} · {rule.name}
             </span>{" "}
-            <span className="opacity-90">{describeRemaining(rule.due, vehicle.odometerUnit)}</span>
-            {rule.estimate && (
+            <span className="opacity-90">
+              {describeRemaining(rule.due, vehicle.odometerUnit, rule.leading)}
+            </span>
+            {rule.estimate && rule.leading !== "time" && (
               <span className="opacity-75"> · {describeEstimate(rule.estimate)}</span>
             )}
           </p>
