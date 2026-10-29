@@ -22,6 +22,13 @@
       "when": 1793217159636,
       "tag": "0002_cynical_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1793243004637,
+      "tag": "0003_pink_lethal_legion",
+      "breakpoints": true
     }
   ]
 }

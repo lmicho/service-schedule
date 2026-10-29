@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { listActiveAlerts } from "@/db/alerts";
+import { AlertBanner } from "@/components/alert-banner";
 import { getDashboardStats, listCostByVehicle, listVehiclesWithRecentLogs } from "@/db/stats";
 import { CarIcon, CashIcon, PlusIcon, ToolsIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
@@ -23,9 +25,11 @@ async function Dashboard() {
   const stats = getDashboardStats();
   const entries = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
   const costs = listCostByVehicle();
+  const alerts = listActiveAlerts();
 
   return (
     <>
+      <AlertBanner alerts={alerts} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
         <MetricCard icon={<CarIcon />} label="Véhicules" value={String(stats.vehicleCount)} />
         <MetricCard
