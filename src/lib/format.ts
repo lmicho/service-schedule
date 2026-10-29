@@ -1,4 +1,4 @@
-import type { DueResult } from "./due";
+import type { DueEstimate, DueResult } from "./due";
 
 export function formatDistance(value: number, unit: string): string {
   return `${value.toLocaleString("fr-CA")} ${unit}`;
@@ -25,6 +25,13 @@ export function describeDue(due: DueResult, unit: string): string[] {
     lines.push(`le ${due.nextDueDate} (${remaining(due.remainingDays, "j")})`);
   }
   return lines;
+}
+
+/** "≈ dans 18 j (vers le 2026-11-15)" / "≈ dans 4 mois (vers le …)" */
+export function describeEstimate(estimate: DueEstimate): string {
+  const wait =
+    estimate.days < 90 ? `${estimate.days} j` : `${Math.round(estimate.days / 30.44)} mois`;
+  return `≈ dans ${wait} (vers le ${estimate.date})`;
 }
 
 /** "en retard de 300 km · dans 12 j": what is left on each interval the rule uses. */

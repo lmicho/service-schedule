@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeDue, describeInterval, describeRemaining } from "./format";
+import { describeDue, describeEstimate, describeInterval, describeRemaining } from "./format";
 
 const base = {
   status: "ok" as const,
@@ -54,5 +54,16 @@ describe("describeRemaining", () => {
 
   it("handles a single interval", () => {
     expect(describeRemaining({ ...base, remainingDays: 5 }, "km")).toBe("dans 5 j");
+  });
+});
+
+describe("describeEstimate", () => {
+  it("uses days for a near date and months for a far one", () => {
+    expect(describeEstimate({ days: 18, date: "2026-11-15" })).toBe(
+      "≈ dans 18 j (vers le 2026-11-15)",
+    );
+    expect(describeEstimate({ days: 125, date: "2027-03-02" })).toBe(
+      "≈ dans 4 mois (vers le 2027-03-02)",
+    );
   });
 });

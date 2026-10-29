@@ -119,3 +119,11 @@ export function ChevronDownIcon({ className = "size-4" }: IconProps) {
     </svg>
   );
 }
+
+export function CheckIcon({ className = "size-4" }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  );
+}

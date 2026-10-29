@@ -7,12 +7,18 @@ import {
   type MaintenanceLog,
   type ScheduleItem,
 } from "./schema";
-import type { DueResult } from "@/lib/due";
+import { estimateDistanceDue, type DueEstimate, type DueResult } from "@/lib/due";
 import { todayLocal } from "@/lib/date";
 import type { RuleFormInput } from "@/lib/rule-form";
 import { computeRuleStatus } from "@/lib/rule-status";
+import { getUsageRate } from "./usage";
 
-export type RuleWithStatus = ScheduleItem & { due: DueResult; lastLog: MaintenanceLog | null };
+export type RuleWithStatus = ScheduleItem & {
+  due: DueResult;
+  lastLog: MaintenanceLog | null;
+  // Probable date of a distance deadline at the vehicle's usual pace (display only).
+  estimate: DueEstimate | null;
+};
 
 export function getRule(vehicleId: number, ruleId: number): ScheduleItem | undefined {
   return db
@@ -43,11 +49,13 @@ export function listRulesWithStatus(vehicleId: number, today = todayLocal()): Ru
     }
   }
 
+  const rate = getUsageRate(vehicle);
   const rank = { overdue: 0, soon: 1, ok: 2 } as const;
   return rules
     .map((rule) => {
       const lastLog = lastByRule.get(rule.id) ?? null;
-      return { ...rule, lastLog, due: computeRuleStatus(rule, lastLog, vehicle, today) };
+      const due = computeRuleStatus(rule, lastLog, vehicle, today);
+      return { ...rule, lastLog, due, estimate: estimateDistanceDue(due, rate, today) };
     })
     .sort((a, b) => rank[a.due.status] - rank[b.due.status] || a.name.localeCompare(b.name));
 }

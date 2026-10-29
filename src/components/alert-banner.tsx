@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { dismissAlert } from "@/app/alerts-actions";
 import type { Alert } from "@/db/alerts";
-import { describeRemaining } from "@/lib/format";
+import { describeEstimate, describeRemaining } from "@/lib/format";
 import { CloseIcon } from "./icons";
 
 const MAX_BANNERS = 3;
@@ -33,6 +33,9 @@ export function AlertBanner({ alerts }: { alerts: Alert[] }) {
               {vehicle.name} · {rule.name}
             </span>{" "}
             <span className="opacity-90">{describeRemaining(rule.due, vehicle.odometerUnit)}</span>
+            {rule.estimate && (
+              <span className="opacity-75"> · {describeEstimate(rule.estimate)}</span>
+            )}
           </p>
           <Link
             href={`/vehicles/${vehicle.id}/logs/new?rule=${rule.id}`}
