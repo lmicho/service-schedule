@@ -7,7 +7,13 @@ import {
   type MaintenanceLog,
   type ScheduleItem,
 } from "./schema";
-import { estimateDistanceDue, type DueEstimate, type DueResult } from "@/lib/due";
+import {
+  estimateDistanceDue,
+  leadingThreshold,
+  type DueEstimate,
+  type DueResult,
+  type Threshold,
+} from "@/lib/due";
 import { todayLocal } from "@/lib/date";
 import type { RuleFormInput } from "@/lib/rule-form";
 import { computeRuleStatus } from "@/lib/rule-status";
@@ -18,6 +24,8 @@ export type RuleWithStatus = ScheduleItem & {
   lastLog: MaintenanceLog | null;
   // Probable date of a distance deadline at the vehicle's usual pace (display only).
   estimate: DueEstimate | null;
+  // The interval that comes first, when the rule has both (null: cannot be told).
+  leading: Threshold | null;
 };
 
 export function getRule(vehicleId: number, ruleId: number): ScheduleItem | undefined {
@@ -55,7 +63,13 @@ export function listRulesWithStatus(vehicleId: number, today = todayLocal()): Ru
     .map((rule) => {
       const lastLog = lastByRule.get(rule.id) ?? null;
       const due = computeRuleStatus(rule, lastLog, vehicle, today);
-      return { ...rule, lastLog, due, estimate: estimateDistanceDue(due, rate, today) };
+      return {
+        ...rule,
+        lastLog,
+        due,
+        estimate: estimateDistanceDue(due, rate, today),
+        leading: leadingThreshold(due, rate),
+      };
     })
     .sort((a, b) => rank[a.due.status] - rank[b.due.status] || a.name.localeCompare(b.name));
 }

@@ -8,6 +8,7 @@ import { listLogs } from "@/db/logs";
 import { listRulesWithStatus } from "@/db/rules";
 import { vehicles } from "@/db/schema";
 import { Detail } from "@/components/detail";
+import { DueLines } from "@/components/due-lines";
 import { PencilIcon, PlusIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
 import {
@@ -18,13 +19,7 @@ import {
   buttonPrimary,
   linkMuted,
 } from "@/components/ui";
-import {
-  describeDue,
-  describeEstimate,
-  describeInterval,
-  describeWarning,
-  formatDistance,
-} from "@/lib/format";
+import { describeInterval, describeWarning, formatDistance } from "@/lib/format";
 
 async function RuleDetails({ params }: { params: Promise<{ id: string; ruleId: string }> }) {
   const { id, ruleId } = await params;
@@ -40,7 +35,6 @@ async function RuleDetails({ params }: { params: Promise<{ id: string; ruleId: s
 
   const unit = vehicle.odometerUnit;
   const logs = listLogs(vehicle.id).filter((l) => l.scheduleItemId === rule.id);
-  const dueLines = describeDue(rule.due, unit);
 
   // Counting starts from the last job logged against the rule, or from the
   // starting point entered on the rule while there is none.
@@ -86,16 +80,7 @@ async function RuleDetails({ params }: { params: Promise<{ id: string; ruleId: s
       <Card title="Détails">
         <dl className="grid grid-cols-1 gap-x-8 gap-y-5 text-sm sm:grid-cols-2">
           <Detail label="Prochaine échéance">
-            {dueLines.length > 0 ? (
-              dueLines.map((line) => <div key={line}>{line}</div>)
-            ) : (
-              <span className="text-gray-500">—</span>
-            )}
-            {rule.estimate && (
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                {describeEstimate(rule.estimate)}
-              </div>
-            )}
+            <DueLines due={rule.due} unit={unit} leading={rule.leading} estimate={rule.estimate} />
           </Detail>
           <Detail label="Intervalle">{describeInterval(rule, unit)}</Detail>
           <Detail label={last.label}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeDue, estimateDistanceDue } from "./due";
+import { computeDue, estimateDistanceDue, leadingThreshold } from "./due";
 
 const from = { odometer: 10_000, date: "2026-01-01" };
 
@@ -93,5 +93,74 @@ describe("estimateDistanceDue", () => {
     expect(estimateDistanceDue({ remainingDistance: -5 }, 30, "2026-01-01")).toBeNull();
     expect(estimateDistanceDue({ remainingDistance: 0 }, 30, "2026-01-01")).toBeNull();
     expect(estimateDistanceDue({ remainingDistance: null }, 30, "2026-01-01")).toBeNull();
+  });
+});
+
+describe("which limit comes first", () => {
+  const rule = { intervalDistance: 5000, intervalMonths: 6 };
+
+  it("alerts as soon as either interval is reached", () => {
+    // Plenty of distance left, but the 6 months are over.
+    const byTime = computeDue(rule, from, { odometer: 10_100, date: "2026-07-10" });
+    expect(byTime).toMatchObject({
+      status: "overdue",
+      distanceStatus: "ok",
+      timeStatus: "overdue",
+    });
+    // Plenty of time left, but the distance is over.
+    const byDistance = computeDue(rule, from, { odometer: 15_100, date: "2026-02-01" });
+    expect(byDistance).toMatchObject({
+      status: "overdue",
+      distanceStatus: "overdue",
+      timeStatus: "ok",
+    });
+  });
+
+  it("reports no status for an interval the rule does not have", () => {
+    expect(
+      computeDue({ intervalDistance: 5000 }, from, { odometer: 10_000, date: "2026-02-01" }),
+    ).toMatchObject({ distanceStatus: "ok", timeStatus: null });
+  });
+
+  it("picks the more urgent interval, then the one reached sooner at the usual pace", () => {
+    const base = { remainingDistance: 0, remainingDays: 0 };
+    expect(leadingThreshold({ ...base, distanceStatus: "ok", timeStatus: "overdue" }, null)).toBe(
+      "time",
+    );
+    expect(leadingThreshold({ ...base, distanceStatus: "overdue", timeStatus: "soon" }, null)).toBe(
+      "distance",
+    );
+
+    // Tied on "soon": 300 km at 20 km/day is 15 days, against 40 days left.
+    const tie = { distanceStatus: "soon", timeStatus: "soon" } as const;
+    expect(leadingThreshold({ ...tie, remainingDistance: 300, remainingDays: 40 }, 20)).toBe(
+      "distance",
+    );
+    expect(leadingThreshold({ ...tie, remainingDistance: 900, remainingDays: 10 }, 20)).toBe(
+      "time",
+    );
+    // Cannot tell without a pace: show both.
+    expect(
+      leadingThreshold({ ...tie, remainingDistance: 300, remainingDays: 40 }, null),
+    ).toBeNull();
+  });
+
+  it("has a single leading interval when the rule has only one", () => {
+    const base = { remainingDistance: 100, remainingDays: null };
+    expect(leadingThreshold({ ...base, distanceStatus: "soon", timeStatus: null }, null)).toBe(
+      "distance",
+    );
+    expect(
+      leadingThreshold(
+        { remainingDistance: null, remainingDays: 9, distanceStatus: null, timeStatus: "soon" },
+        null,
+      ),
+    ).toBe("time");
+    expect(
+      leadingThreshold(
+        { remainingDistance: null, remainingDays: null, distanceStatus: null, timeStatus: null },
+        null,
+      ),
+    ).toBeNull();
   });
 });
