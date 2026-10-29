@@ -6,8 +6,8 @@ import { OdometerQuickEdit } from "@/components/odometer-quick-edit";
 import { updateOdometer } from "@/app/vehicles/actions";
 import { isStale, todayLocal } from "@/lib/date";
 import { AlertBanner } from "@/components/alert-banner";
-import { getDashboardStats, listCostByVehicle, listVehiclesWithRecentLogs } from "@/db/stats";
-import { CarIcon, CashIcon, PlusIcon, ToolsIcon } from "@/components/icons";
+import { listCostByVehicle, listVehiclesWithRecentLogs } from "@/db/stats";
+import { CashIcon, PlusIcon } from "@/components/icons";
 import { LogsTable } from "@/components/logs-table";
 import {
   Badge,
@@ -25,26 +25,20 @@ const LOGS_PER_VEHICLE = 5;
 
 async function Dashboard() {
   await connection(); // sync SQLite driver: keep the queries out of prerendering
-  const stats = getDashboardStats();
   const entries = listVehiclesWithRecentLogs(LOGS_PER_VEHICLE);
   const costs = listCostByVehicle();
+  const totalCost = costs.reduce((sum, v) => sum + v.cost, 0);
   const alerts = listActiveAlerts();
   const today = todayLocal();
 
   return (
     <>
       <AlertBanner alerts={alerts} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
-        <MetricCard icon={<CarIcon />} label="Véhicules" value={String(stats.vehicleCount)} />
-        <MetricCard
-          icon={<ToolsIcon />}
-          label="Travaux enregistrés"
-          value={String(stats.logCount)}
-        />
+      {entries.length > 0 && (
         <MetricCard
           icon={<CashIcon />}
           label="Dépenses totales"
-          value={formatCurrency(stats.totalCost)}
+          value={formatCurrency(totalCost)}
           detail={
             costs.length > 1 && (
               <ul className="flex flex-col justify-end gap-1.5 border-t border-gray-100 pt-4 text-sm sm:min-w-0 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 dark:border-gray-800">
@@ -62,7 +56,7 @@ async function Dashboard() {
             )
           }
         />
-      </div>
+      )}
 
       {entries.length === 0 ? (
         <Card>
