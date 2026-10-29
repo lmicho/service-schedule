@@ -5,8 +5,9 @@ import { Suspense } from "react";
 import { db } from "@/db";
 import { getLog } from "@/db/logs";
 import { scheduleItems, vehicles } from "@/db/schema";
-import { Card, PageTitle } from "@/components/ui";
-import { updateLog } from "../../../../logs-actions";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { Card, PageTitle, buttonDanger } from "@/components/ui";
+import { deleteLog, updateLog } from "../../../../logs-actions";
 import { LogForm } from "../../new/log-form";
 
 export const metadata = { title: "Modifier le travail" };
@@ -53,6 +54,17 @@ async function EditLog({ params }: { params: Promise<{ id: string; logId: string
           cancelHref={`/vehicles/${vehicle.id}`}
           submitLabel="Enregistrer"
         />
+      </Card>
+      <Card title="Supprimer ce travail">
+        <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          L&apos;odomètre du véhicule n&apos;est pas modifié. Si le travail était lié à une règle,
+          le prochain entretien est recalculé à partir du travail précédent.
+        </p>
+        <form action={deleteLog.bind(null, vehicle.id, log.id)}>
+          <ConfirmSubmitButton message="Supprimer ce travail?" className={buttonDanger}>
+            Supprimer le travail
+          </ConfirmSubmitButton>
+        </form>
       </Card>
     </>
   );

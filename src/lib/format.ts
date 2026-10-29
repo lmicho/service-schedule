@@ -41,13 +41,13 @@ export function describeRemaining(due: DueResult, unit: string): string {
   return parts.join(" · ");
 }
 
-/** "tous les 5 000 km · tous les 180 j" */
+/** "tous les 5 000 km · tous les 6 mois" */
 export function describeInterval(
-  rule: { intervalDistance: number | null; intervalDays: number | null },
+  rule: { intervalDistance: number | null; intervalMonths: number | null },
   unit: string,
 ): string {
   const parts: string[] = [];
   if (rule.intervalDistance) parts.push(`tous les ${formatDistance(rule.intervalDistance, unit)}`);
-  if (rule.intervalDays) parts.push(`tous les ${rule.intervalDays} j`);
+  if (rule.intervalMonths) parts.push(`tous les ${rule.intervalMonths} mois`);
   return parts.join(" · ");
 }

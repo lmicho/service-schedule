@@ -55,6 +55,21 @@ export function updateLog(
   });
 }
 
+/**
+ * Returns false when the log does not exist on that vehicle. The vehicle's
+ * odometer is left alone, and a rule it was linked to falls back to the
+ * rule's previous job (or its baseline).
+ */
+export function deleteLog(vehicleId: number, logId: number): boolean {
+  return (
+    db
+      .delete(maintenanceLogs)
+      .where(and(eq(maintenanceLogs.id, logId), eq(maintenanceLogs.vehicleId, vehicleId)))
+      .returning({ id: maintenanceLogs.id })
+      .all().length > 0
+  );
+}
+
 export function getLog(vehicleId: number, logId: number): MaintenanceLog | undefined {
   return db
     .select()

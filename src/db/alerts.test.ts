@@ -14,9 +14,9 @@ const TODAY = "2026-06-01";
 const ruleInput = {
   name: "Huile",
   intervalDistance: 2000,
-  intervalDays: null,
+  intervalMonths: null,
   warnDistance: 300,
-  warnDays: null,
+  warnMonths: null,
   baselineOdometer: 10_000,
   baselineDate: "2026-01-01",
   notes: null,

@@ -38,10 +38,10 @@ describe("describeDue", () => {
 
 describe("describeInterval", () => {
   it("joins the distance and time intervals", () => {
-    const text = describeInterval({ intervalDistance: 5000, intervalDays: 180 }, "km");
-    expect(text).toMatch(/^tous les 5.000 km · tous les 180 j$/);
-    expect(describeInterval({ intervalDistance: null, intervalDays: 365 }, "km")).toBe(
-      "tous les 365 j",
+    const text = describeInterval({ intervalDistance: 5000, intervalMonths: 6 }, "km");
+    expect(text).toMatch(/^tous les 5.000 km · tous les 6 mois$/);
+    expect(describeInterval({ intervalDistance: null, intervalMonths: 12 }, "km")).toBe(
+      "tous les 12 mois",
     );
   });
 });

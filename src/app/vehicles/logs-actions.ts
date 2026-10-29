@@ -2,7 +2,7 @@
 
 import { updateTag } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { insertLog, updateLog as saveLog } from "@/db/logs";
+import { deleteLog as removeLog, insertLog, updateLog as saveLog } from "@/db/logs";
 import { parseLogForm, type LogFormState } from "@/lib/log-form";
 
 export async function createLog(
@@ -29,6 +29,13 @@ export async function updateLog(
   if ("state" in parsed) return parsed.state;
 
   if (!saveLog(vehicleId, logId, parsed.data)) notFound();
+
+  updateTag("vehicles");
+  redirect(`/vehicles/${vehicleId}`);
+}
+
+export async function deleteLog(vehicleId: number, logId: number): Promise<void> {
+  if (!removeLog(vehicleId, logId)) notFound();
 
   updateTag("vehicles");
   redirect(`/vehicles/${vehicleId}`);

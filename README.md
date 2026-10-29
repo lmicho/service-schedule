@@ -65,7 +65,7 @@ data/           Base SQLite locale (ignorée par git)
 ## Modèle de données
 
 - **vehicles**: nom, type (auto / moto / autre), marque, modèle, année, VIN, odomètre et unité
-- **schedule_items**: règle récurrente d'un véhicule, avec intervalle en distance et/ou en jours
+- **schedule_items**: règle récurrente d'un véhicule, avec intervalle en distance et/ou en mois
 - **maintenance_logs**: travail réalisé (date, odomètre, coût, garage, notes), lié ou non à une règle
 
 Le statut d'une règle (`ok`, `soon`, `overdue`) est calculé par `computeDue` dans

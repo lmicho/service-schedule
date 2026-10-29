@@ -126,10 +126,31 @@ describe("updateLog", () => {
     const b = addVehicle(0);
     const rule = db
       .insert(schema.scheduleItems)
-      .values({ vehicleId: b.id, name: "R", intervalDays: 30 })
+      .values({ vehicleId: b.id, name: "R", intervalMonths: 30 })
       .returning()
       .get();
     const log = mod.insertLog(a.id, input)!;
     expect(() => mod.updateLog(a.id, log.id, { ...input, scheduleItemId: rule.id })).toThrow();
+  });
+});
+
+describe("deleteLog", () => {
+  it("deletes a log scoped to its vehicle and keeps the vehicle odometer", () => {
+    const a = addVehicle(0);
+    const b = addVehicle(0);
+    const log = mod.insertLog(a.id, input)!;
+    expect(mod.deleteLog(b.id, log.id)).toBe(false);
+    expect(mod.getLog(a.id, log.id)).toBeDefined();
+
+    expect(mod.deleteLog(a.id, log.id)).toBe(true);
+    expect(mod.getLog(a.id, log.id)).toBeUndefined();
+    expect(mod.deleteLog(a.id, log.id)).toBe(false);
+    expect(
+      db
+        .select()
+        .from(schema.vehicles)
+        .all()
+        .find((x) => x.id === a.id)?.odometer,
+    ).toBe(10_000);
   });
 });

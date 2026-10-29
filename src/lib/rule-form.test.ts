@@ -17,14 +17,14 @@ const valid = {
 describe("parseRuleForm", () => {
   it("accepts a distance-only rule and nulls the empty fields", () => {
     expect(
-      parseRuleForm(form({ ...valid, intervalDays: "", warnDistance: "", notes: "" })),
+      parseRuleForm(form({ ...valid, intervalMonths: "", warnDistance: "", notes: "" })),
     ).toEqual({
       data: {
         name: "Huile",
         intervalDistance: 2000,
-        intervalDays: null,
+        intervalMonths: null,
         warnDistance: null,
-        warnDays: null,
+        warnMonths: null,
         baselineOdometer: 10_000,
         baselineDate: "2026-01-01",
         notes: null,
@@ -32,11 +32,11 @@ describe("parseRuleForm", () => {
     });
   });
 
-  it("accepts a days-only rule with a warning", () => {
+  it("accepts a months-only rule with a warning", () => {
     const r = parseRuleForm(
-      form({ ...valid, intervalDistance: "", intervalDays: "180", warnDays: "14" }),
+      form({ ...valid, intervalDistance: "", intervalMonths: "6", warnMonths: "1" }),
     );
-    expect(r).toMatchObject({ data: { intervalDistance: null, intervalDays: 180, warnDays: 14 } });
+    expect(r).toMatchObject({ data: { intervalDistance: null, intervalMonths: 6, warnMonths: 1 } });
   });
 
   it("requires a name", () => {
@@ -61,8 +61,8 @@ describe("parseRuleForm", () => {
     expect(parseRuleForm(form({ ...valid, warnDistance: "2000" }))).toMatchObject({
       state: { errors: { warnDistance: expect.stringContaining("plus petit") } },
     });
-    expect(parseRuleForm(form({ ...valid, warnDays: "10" }))).toMatchObject({
-      state: { errors: { warnDays: expect.stringContaining("intervalle en jours") } },
+    expect(parseRuleForm(form({ ...valid, warnMonths: "10" }))).toMatchObject({
+      state: { errors: { warnMonths: expect.stringContaining("intervalle en mois") } },
     });
   });
 

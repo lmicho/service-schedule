@@ -2,10 +2,11 @@ export type DueStatus = "ok" | "soon" | "overdue";
 
 export interface DueRule {
   intervalDistance?: number | null;
-  intervalDays?: number | null;
-  // How long before the deadline to warn; defaults to SOON_RATIO of the interval.
+  intervalMonths?: number | null;
+  // How long before the deadline to warn (months for the time interval);
+  // defaults to SOON_RATIO of the interval.
   warnDistance?: number | null;
-  warnDays?: number | null;
+  warnMonths?: number | null;
 }
 
 export interface DuePoint {
@@ -39,6 +40,16 @@ function addDays(date: string, days: number): string {
   return new Date(toUtcDay(date) + days * MS_PER_DAY).toISOString().slice(0, 10);
 }
 
+/** Calendar months; a day past the end of the target month lands on its last day. */
+function addMonths(date: string, months: number): string {
+  const [y, m, d] = date.split("-").map(Number);
+  const index = y * 12 + (m - 1) + months;
+  const year = Math.floor(index / 12);
+  const month = index % 12;
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(year, month, Math.min(d, lastDay))).toISOString().slice(0, 10);
+}
+
 /**
  * Computes when a recurring item is next due.
  * `from` is the last time it was done, or the point where tracking started
@@ -62,11 +73,19 @@ export function computeDue(rule: DueRule, from: DuePoint, current: DuePoint): Du
 
   let nextDueDate: string | null = null;
   let remainingDays: number | null = null;
-  if (rule.intervalDays) {
-    nextDueDate = addDays(from.date, rule.intervalDays);
+  if (rule.intervalMonths) {
+    nextDueDate = addMonths(from.date, rule.intervalMonths);
     remainingDays = Math.round((toUtcDay(nextDueDate) - toUtcDay(current.date)) / MS_PER_DAY);
+    // Warning window opens `warnMonths` before the deadline, or 10% of the interval's length.
+    const warnFrom =
+      rule.warnMonths != null
+        ? addMonths(nextDueDate, -rule.warnMonths)
+        : addDays(
+            nextDueDate,
+            -Math.round(((toUtcDay(nextDueDate) - toUtcDay(from.date)) / MS_PER_DAY) * SOON_RATIO),
+          );
     if (remainingDays < 0) escalate("overdue");
-    else if (remainingDays <= soonThreshold(rule.intervalDays, rule.warnDays)) escalate("soon");
+    else if (current.date >= warnFrom) escalate("soon");
   }
 
   return { status, nextDueOdometer, nextDueDate, remainingDistance, remainingDays };

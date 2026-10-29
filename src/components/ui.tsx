@@ -7,6 +7,8 @@ export const buttonOutline = `${buttonBase} bg-white text-gray-700 ring-1 ring-g
 
 export const buttonDanger = `${buttonBase} bg-white text-red-600 ring-1 ring-red-200 ring-inset hover:bg-red-50 dark:bg-transparent dark:text-red-400 dark:ring-red-500/30 dark:hover:bg-red-500/10`;
 
+export const buttonDangerSolid = `${buttonBase} bg-red-600 text-white shadow-theme-xs hover:bg-red-700`;
+
 export const linkMuted =
   "text-sm text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-brand-400";
 

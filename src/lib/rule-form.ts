@@ -28,9 +28,9 @@ export const ruleFormSchema = z
   .object({
     name: z.string().trim().min(1, "Le nom est requis").max(120),
     intervalDistance: optionalPositiveInt,
-    intervalDays: optionalPositiveInt,
+    intervalMonths: optionalPositiveInt,
     warnDistance: optionalPositiveInt,
-    warnDays: optionalPositiveInt,
+    warnMonths: optionalPositiveInt,
     baselineOdometer: z
       .string()
       .trim()
@@ -46,18 +46,18 @@ export const ruleFormSchema = z
     const issue = (path: string, message: string) =>
       ctx.addIssue({ code: "custom", path: [path], message });
 
-    if (v.intervalDistance === null && v.intervalDays === null) {
-      issue("intervalDistance", "Indique un intervalle en distance ou en jours");
+    if (v.intervalDistance === null && v.intervalMonths === null) {
+      issue("intervalDistance", "Indique un intervalle en distance ou en mois");
     }
     if (v.warnDistance !== null) {
       if (v.intervalDistance === null) issue("warnDistance", "Nécessite un intervalle en distance");
       else if (v.warnDistance >= v.intervalDistance)
         issue("warnDistance", "Doit être plus petit que l'intervalle");
     }
-    if (v.warnDays !== null) {
-      if (v.intervalDays === null) issue("warnDays", "Nécessite un intervalle en jours");
-      else if (v.warnDays >= v.intervalDays)
-        issue("warnDays", "Doit être plus petit que l'intervalle");
+    if (v.warnMonths !== null) {
+      if (v.intervalMonths === null) issue("warnMonths", "Nécessite un intervalle en mois");
+      else if (v.warnMonths >= v.intervalMonths)
+        issue("warnMonths", "Doit être plus petit que l'intervalle");
     }
   });
 
