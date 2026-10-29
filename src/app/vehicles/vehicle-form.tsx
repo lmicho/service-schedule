@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { Field, fieldClass as field } from "@/components/form-field";
+import { Field, Select, fieldClass as field } from "@/components/form-field";
 import { buttonPrimary, linkMuted } from "@/components/ui";
 import type { VehicleFormState } from "@/lib/vehicle-form";
 
@@ -41,11 +41,11 @@ export function VehicleForm({
 
       <div className="grid grid-cols-2 gap-4">
         <Field label="Type *" error={errors.type}>
-          <select name="type" defaultValue={values.type ?? "car"} className={field}>
+          <Select name="type" defaultValue={values.type ?? "car"}>
             <option value="car">Auto</option>
             <option value="motorcycle">Moto</option>
             <option value="other">Autre</option>
-          </select>
+          </Select>
         </Field>
         <Field label="Année" error={errors.year}>
           <input
@@ -78,10 +78,10 @@ export function VehicleForm({
           />
         </Field>
         <Field label="Unité" error={errors.odometerUnit}>
-          <select name="odometerUnit" defaultValue={values.odometerUnit ?? "km"} className={field}>
+          <Select name="odometerUnit" defaultValue={values.odometerUnit ?? "km"}>
             <option value="km">km</option>
             <option value="mi">mi</option>
-          </select>
+          </Select>
         </Field>
       </div>
 
